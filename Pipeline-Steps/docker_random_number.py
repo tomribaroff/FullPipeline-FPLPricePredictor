@@ -10,3 +10,7 @@ def generate_and_multiply():
 
     # Return the result
     return product
+
+result = generate_and_multiply()
+
+print(result)
