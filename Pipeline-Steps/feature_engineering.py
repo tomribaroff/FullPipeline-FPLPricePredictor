@@ -1,87 +1,60 @@
+import numpy as np
+import pandas as pd
 
-def estimate_active_players(api_dict: dict) -> int:
+def estimate_active_players(overall_events_data: pd.DataFrame, total_players: int) -> int:
     """
-    Estimate total Active players in the game at this point in time
+    Estimate total active players in the game at this point in time.
 
-       Args:
-        api_dict = Dictionary created from fetch_data_from_api.extract_current_data_from_api_overall()
+    Args:
+        overall_events_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
+        total_players (int): Integer value extracted from fetch_data_from_api.extract_current_data_from_api_overall().
     """
-
-    r_all_players_today = api_dict.copy()
-
-    # find current gameweek from dict
-    current_event = [item for item, condition in zip(r_all_players_today['events'], boolean_list_of_all_events_status) if condition]
-    current_gameweek = current_event[0].get('id')
-
-    # Rename columns
-    total_active_players_estimate = int(round(r_all_players_today['total_players']*(0.97)**current_gameweek,))
-
+    # Total active players in the game at this point in time (estimate)
+    current_gameweek = np.where(overall_events_data.is_current)[0][0] + 1
+    total_active_players_estimate = int(round(total_players * (0.97) ** current_gameweek))
     return total_active_players_estimate
 
-def calculate_net_transfers_overall(api_dict: dict) -> numpy.array:
+def calculate_net_transfers_overall(todays_player_data: pd.DataFrame) -> np.array:
     """
-    Calculate total net transfer of each player this season at this moment in time
+    Calculate total net transfer of each player this season at this moment in time.
 
-       Args:
-        api_dict = Dictionary created from fetch_data_from_api.extract_current_data_from_api_overall()
+    Args:
+        todays_player_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
     """
-
-    r_all_players_today = api_dict.copy()
-
-    # Calculate total net transfers in for each player
-    all_players_transfers_in = list(map(operator.itemgetter('transfers_in'), r_all_players_today['elements']))
-
-    # Calculate total net transfers out for each player
-    all_players_transfers_out = list(map(operator.itemgetter('transfers_out'), r_all_players_today['elements']))
-
-    # Calculate total net transfers for each player
-    net_transfers_overall_today = numpy.array(all_players_transfers_in) - numpy.array(all_players_transfers_out)
-
+    # Net transfers of players at this moment in time
+    net_transfers_overall_today = todays_player_data.transfers_in - todays_player_data.transfers_out
     return net_transfers_overall_today
 
-def extract_all_players_prices_now(api_dict: dict) -> list:
+def extract_all_players_prices_now(todays_player_data: pd.DataFrame) -> np.array:
     """
-    Extract current price of each player at this moment in time
+    Extract the current prices of players at this moment in time from the supplied DataFrame.
 
-       Args:
-        api_dict = Dictionary created from fetch_data_from_api.extract_current_data_from_api_overall()
+    Args:
+        todays_player_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
     """
-
-    r_all_players_today = api_dict.copy()
-
-    # Extract players prices from dict
-    all_players_prices_today = list(map(operator.itemgetter('now_cost'), r_all_players_today['elements']))
-
+    # Price Change so far this event
+    all_players_prices_today = todays_player_data.now_cost
     return all_players_prices_today
 
-def extract_all_players_price_changes_this_event(api_dict: dict) -> list:
+def extract_all_players_price_changes_this_event(todays_player_data: pd.DataFrame) -> np.array:
     """
-    Extract how much each play has changed price so far this event
+    Extract the changes of price for players during this event window from the supplied DataFrame.
 
-       Args:
-        api_dict = Dictionary created from fetch_data_from_api.extract_current_data_from_api_overall()
+    Args:
+        todays_player_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
     """
-
-    r_all_players_today = api_dict.copy()
-
     # Extract players prices from dict
-    all_players_price_change_for_current_event = list(map(operator.itemgetter('cost_change_event'), r_all_players_today['elements']))
-
+    # Price Change so far this event
+    all_players_price_change_for_current_event = todays_player_data.cost_change_event
     return all_players_price_change_for_current_event
 
-
-def extract_all_players_injured(api_dict: dict) -> list:
+def extract_all_players_injured(todays_player_data: pd.DataFrame) -> np.array:
     """
-    Extract boolean list of all players which is True if they are injured and False otherwise
+    Extract a boolean list of all players which is True if they are injured and False otherwise.
 
-       Args:
-        api_dict = Dictionary created from fetch_data_from_api.extract_current_data_from_api_overall()
+    Args:
+        todays_player_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
     """
-
-    r_all_players_today = api_dict.copy()
-
-    # Extract which players are currently injured
-    list_of_all_players_status = list(map(operator.itemgetter('status'), r_all_players_today['elements']))
-    boolean_list_of_players_injured = [True if x == 'i' else False for x in list_of_all_players_status] 
-
+    # Player currently flagged red
+    boolean_list_of_players_injured = [status == 'i' for status in todays_player_data.status]
     return boolean_list_of_players_injured
