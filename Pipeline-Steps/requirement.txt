@@ -21,3 +21,4 @@ tzdata=2023d=h04d1e81_0
 wheel=0.41.2=py311hca03da5_0
 xz=5.4.5=h80987f9_0
 zlib=1.2.13=h5a0b063_0
+gcloud=1.17.0
