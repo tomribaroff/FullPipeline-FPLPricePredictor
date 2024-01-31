@@ -6,20 +6,19 @@ import pandas as pd
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
 
 def save_file_to_bucket(input_file_path, bucket_file_path, bucket_name):
 
+    load_dotenv()
     creds = os.getenv('JSON_SA_BATCH_PREDICTION_PATH')
-
-    print(creds)
+    gcp_project_id = os.getenv('GCP_PROJECT_ID')
 
     with open(creds) as json_file:
         data = json.load(json_file)
     
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(data)
 
-    client = storage.Client(credentials=credentials, project='high-producer-412815')
+    client = storage.Client(credentials=credentials, project=gcp_project_id)
 
     bucket = client.get_bucket(bucket_name)
 
