@@ -1,4 +1,3 @@
-
 def extract_current_data_from_api_overall(
 ) -> Optional[Dict]:
     """
@@ -20,9 +19,7 @@ https://www.game-change.co.uk/2023/02/10/a-complete-guide-to-the-fantasy-premier
 
 def extract_current_data_from_api_personal(
         team_id: int = 3402291
-        current_gameweek: int = 1
-        
-) -> Optional[Dict]:
+        current_gameweek: int = 1) -> Optional[Dict]:
     """
     Extract data from the Fantasy Football Data API that contains data on all player transfers 
 
