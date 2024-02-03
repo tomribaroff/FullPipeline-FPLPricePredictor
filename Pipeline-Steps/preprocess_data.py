@@ -16,6 +16,6 @@ def preprocess_data(json_file: Dict) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
     
     overall_events_data = pd.DataFrame(json_file['events'])
     todays_player_data = pd.DataFrame(json_file['elements'])
-    total_players = json_file['total_players']
+    total_players = int(json_file['total_players'])
 
     return overall_events_data, todays_player_data, total_players

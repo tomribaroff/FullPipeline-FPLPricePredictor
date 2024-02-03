@@ -7,15 +7,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 import date
 
-
-def save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_path, bucket_name):
+def save_file_from_bucket(local_file_path, bucket_file_path, bucket_name):
     """
-    Uploads a CSV and a JSON file to a Google Cloud Storage bucket.
+    Downloads a file (or files) from a Google Cloud Storage bucket and saves it locally.
 
     Parameters:
-    - input_file_path_csv (str): Local path of the CSV file to be uploaded.
-    - input_file_path_json (str): Local path of the JSON file to be uploaded.
-    - bucket_file_path (str): Path within the bucket to save both files.
+    - local_file_path (str): Local path where the downloaded file(s) will be saved.
+    - bucket_file_path (str): Path of the file(s) within the Google Cloud Storage bucket.
     - bucket_name (str): Name of the Google Cloud Storage bucket.
 
     Returns:
@@ -42,23 +40,15 @@ def save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_p
     # Get the specified bucket
     bucket = client.get_bucket(bucket_name)
 
-    # Create a blob (file) in the bucket with the specified path
+    # Get the blob (file(s)) from the bucket
     blob = bucket.blob(bucket_file_path)
 
-    # Upload the contents of the CSV file to the blob
-    with open(input_file_path_csv, 'rb') as csv_file:
-        blob.upload_from_file(csv_file, content_type='application/octet-stream')
-
-    # Upload the contents of the JSON file to the blob
-    with open(input_file_path_json, 'rb') as json_file:
-        blob.upload_from_file(json_file, content_type='application/json')
-
+    # Download the contents of the blob to the specified local file path
+    blob.download_to_filename(local_file_path)
 
 # Get today's date
 # today = date.today() 
 # input_file_path_csv = Path('./Pipeline-Steps/Saved_Data/{}/{}.csv'.format(today,today)) 
-# input_file_path_json = Path('./Pipeline-Steps/Saved_Data/{}/{}.json'.format(today,today)') 
 # bucket_file_path = today
 # bucket = 'batch_prediction_store_bucket'
-# save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_path, bucket)
-
+# save_file_from_bucket(input_file_path, bucket_file_path, bucket)
