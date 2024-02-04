@@ -42,7 +42,7 @@ def run():
     logger.info(f"Sucessfully created today's DataFrame.")
 
     logger.info(f"Download yesterday's DataFrame.")
-    yesterday_df = download_yesterday_csv_from_bucket('{}/{}.csv'.format(yesterday, yesterday), 'batch_prediction_store_bucket')
+    yesterday_df = download_yesterday_csv_from_bucket('{}/{}.csv'.format(yesterday, yesterday), 'raw_data_and_features_bucket')
     logger.info(f"Successfully downloaded yesterday's DataFrame.")
 
     logger.info(f"Realign yesterday's DataFrame according to today's DataFrame.")
@@ -54,11 +54,11 @@ def run():
     logger.info(f"Successfully updated Dataframes")
 
     logger.info(f"Save today's CSV and JSON to bucket")
-    save_today_data_to_bucket(today_df, today_json, '{}/{}.csv'.format(today, today), 'batch_prediction_store_bucket')
+    save_today_data_to_bucket(today_df, today_json, '{}/{}.csv'.format(today, today), 'raw_data_and_features_bucket')
     logger.info(f"Successfully saved today's CSV and JSON to bucket")
 
     logger.info(f"Overwrite yesterday's CSV to bucket")
-    overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday), 'batch_prediction_store_bucket') 
+    overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday), 'raw_data_and_features_bucket') 
     logger.info(f"Successfully overwritten yesterday's CSV to bucket")
 
     logger.info(f"Successfully completion of ETL pipeline loop")

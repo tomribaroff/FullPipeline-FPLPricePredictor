@@ -26,7 +26,7 @@ def save_today_data_to_bucket(csv_data, json_data, bucket_file_path, bucket_name
     load_dotenv()
 
     # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
-    creds = os.getenv('JSON_SA_BATCH_PREDICTION_PATH')
+    creds = os.getenv('JSON_SA_RAW_DATA_PATH')
     gcp_project_id = os.getenv('GCP_PROJECT_ID')
 
     # Load service account credentials from JSON file
