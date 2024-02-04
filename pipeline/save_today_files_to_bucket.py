@@ -8,13 +8,13 @@ from dotenv import load_dotenv
 import date
 
 
-def save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_path, bucket_name):
+def save_today_data_to_bucket(csv_data, json_data, bucket_file_path, bucket_name):
     """
-    Uploads a CSV and a JSON file to a Google Cloud Storage bucket.
+    Upload today's CSV and JSON data to a Google Cloud Storage bucket.
 
     Parameters:
-    - input_file_path_csv (str): Local path of the CSV file to be uploaded.
-    - input_file_path_json (str): Local path of the JSON file to be uploaded.
+    - csv_data (str): CSV data to be uploaded.
+    - json_data (str): JSON data to be uploaded.
     - bucket_file_path (str): Path within the bucket to save both files.
     - bucket_name (str): Name of the Google Cloud Storage bucket.
 
@@ -45,20 +45,8 @@ def save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_p
     # Create a blob (file) in the bucket with the specified path
     blob = bucket.blob(bucket_file_path)
 
-    # Upload the contents of the CSV file to the blob
-    with open(input_file_path_csv, 'rb') as csv_file:
-        blob.upload_from_file(csv_file, content_type='application/octet-stream')
+    # Upload the CSV data to the blob
+    blob.upload_from_string(csv_data, content_type='text/csv')
 
-    # Upload the contents of the JSON file to the blob
-    with open(input_file_path_json, 'rb') as json_file:
-        blob.upload_from_file(json_file, content_type='application/json')
-
-
-# Get today's date
-# today = date.today() 
-# input_file_path_csv = Path('./Pipeline-Steps/Saved_Data/{}/{}.csv'.format(today,today)) 
-# input_file_path_json = Path('./Pipeline-Steps/Saved_Data/{}/{}.json'.format(today,today)') 
-# bucket_file_path = today
-# bucket = 'batch_prediction_store_bucket'
-# save_file_to_bucket(input_file_path_csv, input_file_path_json, bucket_file_path, bucket)
-
+    # Upload the JSON data to the blob
+    blob.upload_from_string(json_data, content_type='application/json')

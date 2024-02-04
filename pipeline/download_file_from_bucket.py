@@ -1,23 +1,21 @@
-from gcloud import storage
-from oauth2client.service_account import ServiceAccountCredentials
+from google.cloud import storage
+from google.oauth2 import service_account
+from dotenv import load_dotenv
 import os
 import json
 import pandas as pd
-from pathlib import Path
-from dotenv import load_dotenv
-import date
+from io import StringIO
 
-def save_file_from_bucket(local_file_path, bucket_file_path, bucket_name):
+def download_yesterday_csv_from_bucket(bucket_file_path, bucket_name):
     """
-    Downloads a file (or files) from a Google Cloud Storage bucket and saves it locally.
+    Downloads a CSV file from a Google Cloud Storage bucket and returns its contents as a Pandas DataFrame.
 
     Parameters:
-    - local_file_path (str): Local path where the downloaded file(s) will be saved.
-    - bucket_file_path (str): Path of the file(s) within the Google Cloud Storage bucket.
+    - bucket_file_path (str): Path of the CSV file within the Google Cloud Storage bucket.
     - bucket_name (str): Name of the Google Cloud Storage bucket.
 
     Returns:
-    - None
+    - pd.DataFrame: Contents of the downloaded CSV file as a DataFrame.
     """
 
     # Load environment variables from .env file
@@ -40,15 +38,13 @@ def save_file_from_bucket(local_file_path, bucket_file_path, bucket_name):
     # Get the specified bucket
     bucket = client.get_bucket(bucket_name)
 
-    # Get the blob (file(s)) from the bucket
+    # Get the blob (CSV file) from the bucket
     blob = bucket.blob(bucket_file_path)
 
-    # Download the contents of the blob to the specified local file path
-    blob.download_to_filename(local_file_path)
+    # Download the contents of the blob as a string
+    csv_content = blob.download_as_text()
 
-# Get today's date
-# today = date.today() 
-# input_file_path_csv = Path('./Pipeline-Steps/Saved_Data/{}/{}.csv'.format(today,today)) 
-# bucket_file_path = today
-# bucket = 'batch_prediction_store_bucket'
-# save_file_from_bucket(input_file_path, bucket_file_path, bucket)
+    # Create a Pandas DataFrame from the CSV content
+    df = pd.read_csv(StringIO(csv_content))
+
+    return df

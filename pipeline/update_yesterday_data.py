@@ -1,4 +1,4 @@
-def update_yesterday_and_today_data():
+def update_yesterday_and_today_data(yesterday_data, today_data):
     #update yesterday's dataframe with today's results 
 
     #get yesterday's saved results 
@@ -20,4 +20,4 @@ def update_yesterday_and_today_data():
     #rewrite yesterday's file 
     yesterday_data.to_csv(yesterday_filepath) 
 
-    return yesterday_data
+    return yesterday_data, today_data
