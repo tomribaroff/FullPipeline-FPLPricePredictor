@@ -1,7 +1,7 @@
 from typing import Dict, List
 import pandas as pd
 
-def preprocess_data(json_file: Dict) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
+def preprocess_data_from_json(json_file: Dict) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
     """
     Extracts information from a JSON file and returns two DataFrames and a total player count.
 

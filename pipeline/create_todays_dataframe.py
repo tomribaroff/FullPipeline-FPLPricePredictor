@@ -1,6 +1,6 @@
 from pipeline import feature_engineering
 
-def create_todays_dataframe(overall_events_data: pd.DataFrame -> pd.DataFrame):
+def create_todays_dataframe_from_raw_csv(overall_events_data: pd.DataFrame -> pd.DataFrame):
     # Create DataFrame from dictionary of all this transfer data
     # Player transfer data from the API is updated at least every 40 minutes, and probably every 15 - 30 mins. 
 

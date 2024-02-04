@@ -3,63 +3,65 @@ from typing import Optional
 import fire
 import pandas as pd
 
-from pipeline import logs
+import logs
+from preprocess_data import preprocess_data_from_json
+from fetch_data_from_api import extract_current_data_from_api_overall
+from create_todays_dataframe import create_todays_dataframe_from_raw_csv
+from download_file_from_bucket import download_yesterday_csv_from_bucket
+from update_yesterday_data_rows import update_yesterday_data_rows_align
+from update_yesterday_data import update_yesterday_and_today_data_together
+from save_today_files_to_bucket import save_today_data_to_bucket
+from overwrite_yesterdays_data import overwrite_yesterdays_csv
+from datetime import date
+from datetime import timedelta
 
 logger = logs.get_logger(__name__)
 
+# Get today's date
+today = date.today() 
 
-# def run():
-#     """
-#     Extract data from the API, transform it, load it to a GCP bucket, and update past uploads with new information
+# Get yesterday date
+yesterday = today - timedelta(days = 1) 
 
-#     """
+def run():
+    """
+    Extract data from the API, transform it, load it to a GCP bucket, and update past uploads with new information
 
-#     logger.info(f"Extracting data from API.")
-#     data, metadata = extract.from_file(
-#         export_end_reference_datetime, days_delay, days_export, url
-#     )
-#     if metadata["num_unique_samples_per_time_series"] < days_export * 24:
-#         raise RuntimeError(
-#             f"Could not extract the expected number of samples from the api: {metadata['num_unique_samples_per_time_series']} < {days_export * 24}. \
-#             Check out the API at: https://www.energidataservice.dk/tso-electricity/ConsumptionDE35Hour "
-#         )
-#     logger.info("Successfully extracted data from API.")
+    """
 
-#     logger.info(f"Transforming data.")
-#     data = transform(data)
-#     logger.info("Successfully transformed data.")
+    logger.info(f"Extracting data from API.")
+    today_json = extract_current_data_from_api_overall
+    logger.info("Successfully extracted data from API.")
 
-#     logger.info("Building validation expectation suite.")
-#     validation_expectation_suite = validation.build_expectation_suite()
-#     logger.info("Successfully built validation expectation suite.")
+    logger.info(f"Preprocessing data.")
+    overall_events_data, todays_player_data, total_players = preprocess_data_from_json(today_json)
+    logger.info("Successfully preprocessed data.")
 
-#     logger.info(f"Validating data and loading it to the feature store.")
-#     load.to_feature_store(
-#         data,
-#         validation_expectation_suite=validation_expectation_suite,
-#         feature_group_version=feature_group_version,
-#     )
-#     metadata["feature_group_version"] = feature_group_version
-#     logger.info("Successfully validated data and loaded it to the feature store.")
+    logger.info(f"Create today's DataFrame.")
+    today_df = create_todays_dataframe_from_raw_csv(overall_events_data)
+    logger.info(f"Sucessfully created today's DataFrame.")
 
-#     logger.info(f"Wrapping up the pipeline.")
-#     utils.save_json(metadata, file_name="feature_pipeline_metadata.json")
-#     logger.info("Done!")
+    logger.info(f"Download yesterday's DataFrame.")
+    yesterday_df = download_yesterday_csv_from_bucket('{}/{}.csv'.format(yesterday, yesterday), 'batch_prediction_store_bucket')
+    logger.info(f"Successfully downloaded yesterday's DataFrame.")
 
-#     return metadata
+    logger.info(f"Realign yesterday's DataFrame according to today's DataFrame.")
+    yesterday_df = update_yesterday_data_rows_align(yesterday_df) 
+    logger.info(f"Successfully realigned")
 
+    logger.info(f"Update yesterday's df according to today's df and vice versa.")
+    yesterday_df, today_df = update_yesterday_and_today_data_together(yesterday_df, today_df) 
+    logger.info(f"Successfully updated Dataframes")
 
-# def transform(data: pd.DataFrame):
-#     """
-#     Wrapper containing all the transformations from the ETL pipeline.
-#     """
+    logger.info(f"Save today's CSV and JSON to bucket")
+    save_today_data_to_bucket(today_df, today_json, '{}/{}.csv'.format(today, today), 'batch_prediction_store_bucket')
+    logger.info(f"Successfully saved today's CSV and JSON to bucket")
 
-#     data = cleaning.rename_columns(data)
-#     data = cleaning.cast_columns(data)
-#     data = cleaning.encode_area_column(data)
+    logger.info(f"Overwrite yesterday's CSV to bucket")
+    overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday), 'batch_prediction_store_bucket') 
+    logger.info(f"Successfully overwritten yesterday's CSV to bucket")
 
-#     return data
+    logger.info(f"Successfully completion of ETL pipeline loop")
 
-
-# if __name__ == "__main__":
-#     fire.Fire(run)
+if __name__ == "__main__":
+    fire.Fire(run)

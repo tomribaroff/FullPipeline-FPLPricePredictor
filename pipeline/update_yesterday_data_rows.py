@@ -1,4 +1,4 @@
-def update_yesterday_data_rows(yesterday_df, today_df, id_column):
+def update_yesterday_data_rows_align(yesterday_df, today_df, id_column):
     # compare the ids from both datasets -> where a new player appears today, make sure you add that row to yesterday with nulls filling it
     #                                    -> where a player is removed today, make sure you remove that row yesterday 
     

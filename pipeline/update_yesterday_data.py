@@ -1,4 +1,4 @@
-def update_yesterday_and_today_data(yesterday_data, today_data):
+def update_yesterday_and_today_data_together(yesterday_data, today_data):
     #update yesterday's dataframe with today's results 
 
     #get yesterday's saved results 
