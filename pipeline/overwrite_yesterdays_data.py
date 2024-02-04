@@ -12,7 +12,7 @@ def overwrite_yesterdays_csv(yesterday_csv_updated, bucket_file_path, bucket_nam
     """
 
     # Load service account credentials from JSON file
-    creds = os.getenv('JSON_SA_RAW_DATA_PATH')
+    creds = os.getenv('JSON_SA_READ_WRITE_PATH')
     credentials = service_account.Credentials.from_service_account_file(creds)
 
     # Create a Google Cloud Storage client with the provided credentials
