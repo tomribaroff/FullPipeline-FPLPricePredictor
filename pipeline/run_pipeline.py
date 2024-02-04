@@ -3,7 +3,7 @@ from typing import Optional
 import fire
 import pandas as pd
 
-import logs
+import logs,validation
 from preprocess_data import preprocess_data_from_json
 from fetch_data_from_api import extract_current_data_from_api_overall
 from create_todays_dataframe import create_todays_dataframe_from_raw_csv
@@ -12,6 +12,8 @@ from update_yesterday_data_rows import update_yesterday_data_rows_align
 from update_yesterday_data import update_yesterday_and_today_data_together
 from save_today_files_to_bucket import save_today_data_to_bucket
 from overwrite_yesterdays_data import overwrite_yesterdays_csv
+from save_data_to_feature_store import to_feature_store
+
 from datetime import date
 from datetime import timedelta
 
@@ -60,6 +62,19 @@ def run():
     logger.info(f"Overwrite yesterday's CSV to bucket")
     overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday), 'raw_data_and_features_bucket') 
     logger.info(f"Successfully overwritten yesterday's CSV to bucket")
+
+    logger.info("Building validation expectation suite.")
+    validation_expectation_suite = validation.build_expectation_suite()
+    logger.info("Successfully built validation expectation suite.")
+
+    logger.info(f"Validating data and loading it to the feature store.")
+    save_data_to_feature_store.to_feature_store(
+        data,
+        validation_expectation_suite=validation_expectation_suite,
+        feature_group_version=feature_group_version,
+    )
+    metadata["feature_group_version"] = feature_group_version
+    logger.info("Successfully validated data and loaded it to the feature store.")
 
     logger.info(f"Successfully completion of ETL pipeline loop")
 
