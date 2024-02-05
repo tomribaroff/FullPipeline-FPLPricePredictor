@@ -1,23 +1,33 @@
-def update_yesterday_and_today_data_together(yesterday_data, today_data):
-    #update yesterday's dataframe with today's results 
+def update_yesterday_data_rows(yesterday_df, today_df):
+    # compare the ids from both datasets -> where a new player appears today, make sure you add that row to yesterday with nulls filling it
+    #                                    -> where a player is removed today, make sure you remove that row yesterday 
+    
+    # Get the set of row identifiers from yesterday and today
+    yesterday_ids = set(yesterday_df.player_ids)
+    today_ids = set(today_df.player_ids)
 
-    #get yesterday's saved results 
-    yesterday_filepath = Path('/Users/thomasribaroff/Documents/GitHub/FullPipeline-FPLPricePredictor/Pipeline-Steps/Saved_DataFrames/{}/{}.csv'.format(yesterday,yesterday))
-    yesterday_data = pandas.read_csv(yesterday_filepath,index_col=['player_ids'])
+    # Find new rows added today
+    new_rows = today_ids - yesterday_ids
 
-    #ensure rows align, accounting for players being added/removed overnight
-    yesterday_data = update_yesterday_data_rows(yesterday_data, today_data, 'player_ids')
+    # Add new rows with null values to yesterday's dataframe
+    if new_rows:
+        new_rows_data = today_df[today_df.player_ids.isin(new_rows)]
+        yesterday_df = pandas.concat([yesterday_df, new_rows_data])
+        yesterday_df = yesterday_df.sort_values(by='player_ids')
 
-    #updates 
-    yesterday_data.price_change_this_night = today_data.player_prices_today - yesterday_data.player_prices_today
-    yesterday_data.net_transfers_in_out_since_yesterday = today_data.net_transfers_in_out_overall_as_of_today - yesterday_data.net_transfers_in_out_overall_as_of_today
+    # Find rows removed today
+    removed_rows = yesterday_ids - today_ids
 
-    # Update net transfer since last price change in today's data (including reset rule if price change occured overnight)
-    today_data.net_transfers_in_out_since_last_price_change = yesterday_data.net_transfers_in_out_since_last_price_change + yesterday_data.net_transfers_in_out_since_yesterday
-    boolean_player_changes = [today_data.price_change_this_night != 0]
-    today_data.net_transfers_in_out_since_last_price_change = [0 if b else a for a, b in zip(today_data.net_transfers_in_out_since_last_price_change, boolean_player_changes[0])]
+    # Remove rows from yesterday's dataframe
+    if removed_rows:
+        yesterday_df = yesterday_df[~yesterday_df.player_ids.isin(removed_rows)]
+        yesterday_df = yesterday_df.sort_values(by='player_ids')
 
-    #rewrite yesterday's file 
-    yesterday_data.to_csv(yesterday_filepath) 
+    today_df = pandas.concat([today_df], ignore_index=True)
+    today_df = today_df.sort_values(by='player_ids')
 
-    return yesterday_data, today_data
+    #set indexes
+    today_df.set_index('player_ids', inplace=True)
+    yesterday_df.set_index('player_ids', inplace=True)
+
+    return yesterday_df, today_df
