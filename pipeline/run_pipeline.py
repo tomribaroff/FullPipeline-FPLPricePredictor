@@ -25,9 +25,9 @@ today = date.today()
 # Get yesterday date
 yesterday = today - timedelta(days = 1) 
 
-def run():
+def run(feature_group_version: int = 1):
     """
-    Extract data from the API, transform it, load it to a GCP bucket, and update past uploads with new information
+    Extract data from the API, transform it, save json and CSV to a GCP bucket, and update past CSV with new information, overwrite past CSV in bucket with updated past CSV, upload updated past CSV to feature store
 
     """
 
@@ -67,13 +67,12 @@ def run():
     validation_expectation_suite = validation.build_expectation_suite()
     logger.info("Successfully built validation expectation suite.")
 
-    logger.info(f"Validating data and loading it to the feature store.")
+    logger.info(f"Validating data and loading yesterday's complete dataset to the feature store.")
     save_data_to_feature_store.to_feature_store(
         data,
         validation_expectation_suite=validation_expectation_suite,
         feature_group_version=feature_group_version,
     )
-    metadata["feature_group_version"] = feature_group_version
     logger.info("Successfully validated data and loaded it to the feature store.")
 
     logger.info(f"Successfully completion of ETL pipeline loop")
