@@ -1,6 +1,6 @@
 from pipeline import feature_engineering
 
-def create_todays_dataframe_from_raw_csv(overall_events_data: pd.DataFrame,
+def create_todays_dataframe_from_raw_csvs(overall_events_data: pd.DataFrame,
                                          todays_player_data: pd.DataFrame,
                                          total_players: int -> pd.DataFrame
                                          ):

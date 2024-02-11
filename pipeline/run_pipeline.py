@@ -40,7 +40,7 @@ def run(feature_group_version: int = 1):
     logger.info("Successfully preprocessed data.")
 
     logger.info(f"Create today's DataFrame.")
-    today_df = create_todays_dataframe_from_raw_csv(overall_events_data)
+    today_df = create_todays_dataframe_from_raw_csvs(overall_events_data, todays_player_data)
     logger.info(f"Sucessfully created today's DataFrame.")
 
     logger.info(f"Download yesterday's DataFrame.")
