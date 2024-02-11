@@ -5,7 +5,6 @@ def overwrite_yesterdays_csv(yesterday_csv_updated, bucket_file_path):
     Parameters:
     - local_file_path (str): Local path of the file to be uploaded.
     - bucket_file_path (str): Path to the destination file within the Google Cloud Storage bucket.
-    - bucket_name (str): Name of the Google Cloud Storage bucket.
 
     Returns:
     - None

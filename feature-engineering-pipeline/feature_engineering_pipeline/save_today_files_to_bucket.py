@@ -16,7 +16,6 @@ def save_today_data_to_bucket(csv_data, json_data, bucket_file_path):
     - csv_data (str): CSV data to be uploaded.
     - json_data (str): JSON data to be uploaded.
     - bucket_file_path (str): Path within the bucket to save both files.
-    - bucket_name (str): Name of the Google Cloud Storage bucket.
 
     Returns:
     - None

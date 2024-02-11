@@ -1,4 +1,4 @@
-from pipeline import feature_engineering
+from feature_engineering_pipeline import feature_engineering
 
 def create_todays_dataframe_from_raw_csvs(overall_events_data: pd.DataFrame,
                                          todays_player_data: pd.DataFrame,
