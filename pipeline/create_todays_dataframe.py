@@ -1,11 +1,14 @@
 from pipeline import feature_engineering
 
-def create_todays_dataframe_from_raw_csv(overall_events_data: pd.DataFrame -> pd.DataFrame):
+def create_todays_dataframe_from_raw_csv(overall_events_data: pd.DataFrame,
+                                         todays_player_data: pd.DataFrame,
+                                         total_players: int -> pd.DataFrame
+                                         ):
     # Create DataFrame from dictionary of all this transfer data
     # Player transfer data from the API is updated at least every 40 minutes, and probably every 15 - 30 mins. 
 
         all_players_price_change_for_current_event = feature_engineering.extract_all_players_price_changes_this_event(todays_player_data)
-        total_active_players_estimate = feature_engineering.estimate_active_players(overall_events_data)
+        total_active_players_estimate = feature_engineering.estimate_active_players(overall_events_data, total_players)
         boolean_list_of_players_injured = feature_engineering.extract_all_players_injured(todays_player_data)
         all_players_prices_today = feature_engineering.extract_all_players_prices_now(todays_player_data)
         net_transfers_overall_today = feature_engineering.calculate_net_transfers_overall(todays_player_data)
