@@ -6,7 +6,7 @@ import json
 import pandas as pd
 from io import StringIO
 
-def download_yesterday_csv_from_bucket(bucket_file_path, bucket_name):
+def download_yesterday_csv_from_bucket(bucket_file_path):
     """
     Downloads a CSV file from a Google Cloud Storage bucket and returns its contents as a Pandas DataFrame.
 
@@ -24,6 +24,7 @@ def download_yesterday_csv_from_bucket(bucket_file_path, bucket_name):
     # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
     creds = os.getenv('JSON_SA_READ_WRITE_PATH')
     gcp_project_id = os.getenv('GCP_PROJECT_ID')
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
 
     # Load service account credentials from JSON file
     with open(creds) as json_file:
@@ -36,7 +37,7 @@ def download_yesterday_csv_from_bucket(bucket_file_path, bucket_name):
     client = storage.Client(credentials=credentials, project=gcp_project_id)
 
     # Get the specified bucket
-    bucket = client.get_bucket(bucket_name)
+    bucket = client.get_bucket(gcp_bucket_name)
 
     # Get the blob (CSV file) from the bucket
     blob = bucket.blob(bucket_file_path)

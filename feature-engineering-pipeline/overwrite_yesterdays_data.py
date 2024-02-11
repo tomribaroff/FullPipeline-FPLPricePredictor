@@ -1,4 +1,4 @@
-def overwrite_yesterdays_csv(yesterday_csv_updated, bucket_file_path, bucket_name):
+def overwrite_yesterdays_csv(yesterday_csv_updated, bucket_file_path):
     """
     Deletes existing file for yesterday's data, and then uploads the updated copy to a Google Cloud Storage bucket.
 
@@ -14,12 +14,13 @@ def overwrite_yesterdays_csv(yesterday_csv_updated, bucket_file_path, bucket_nam
     # Load service account credentials from JSON file
     creds = os.getenv('JSON_SA_READ_WRITE_PATH')
     credentials = service_account.Credentials.from_service_account_file(creds)
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
 
     # Create a Google Cloud Storage client with the provided credentials
     client = storage.Client(credentials=credentials)
 
     # Get the specified bucket
-    bucket = client.get_bucket(bucket_name)
+    bucket = client.get_bucket(gcp_bucket_name)
 
     # Get the blob (file) from the bucket with the same name, if it exists
     blob = bucket.blob(bucket_file_path)
