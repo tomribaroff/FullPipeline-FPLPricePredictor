@@ -14,7 +14,7 @@ from sktime.utils.plotting import plot_windows
 
 from training_pipeline import utils
 from training_pipeline.configs import gridsearch as gridsearch_configs
-from training_pipeline.data import load_dataset_from_feature_store
+from training_pipeline.data import load_dataset_from_feature_store, prepare_data, split_data
 from training_pipeline.models import build_model
 from training_pipeline.utils import init_wandb_run
 from training_pipeline.settings import SETTINGS, OUTPUT_DIR
@@ -24,14 +24,12 @@ logger = utils.get_logger(__name__)
 
 
 def run(
-    fh: int = 24,
     feature_view_version: Optional[int] = None,
     training_dataset_version: Optional[int] = None,
 ) -> dict:
     """Run hyperparameter optimization search.
 
     Args:
-        fh (int, optional): Forecasting horizon. Defaults to 24.
         feature_view_version (Optional[int], optional): feature store - feature view version.
              If none, it will try to load the version from the cached feature_view_metadata.json file. Defaults to None.
         training_dataset_version (Optional[int], optional): feature store - feature view - training dataset version.
@@ -53,7 +51,7 @@ def run(
         fh=fh,
     )
 
-    sweep_id = run_hyperparameter_optimization(y_train, X_train, fh=fh)
+    sweep_id = run_hyperparameter_optimization(y_train, X_train)
 
     metadata = {"sweep_id": sweep_id}
     utils.save_json(metadata, file_name="last_sweep_metadata.json")
@@ -73,13 +71,13 @@ def run_hyperparameter_optimization(
     wandb.agent(
         project=SETTINGS["WANDB_PROJECT"],
         sweep_id=sweep_id,
-        function=partial(run_sweep, y_train=y_train, X_train=X_train, fh=fh),
+        function=partial(run_sweep, y_train=y_train, X_train=X_train),
     )
 
     return sweep_id
 
 
-def run_sweep(y_train: pd.DataFrame, X_train: pd.DataFrame, fh: int):
+def run_sweep(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame):
     """Runs a single hyperparameter optimization step (train + CV eval) using W&B sweeps."""
 
     with init_wandb_run(
@@ -89,9 +87,8 @@ def run_sweep(y_train: pd.DataFrame, X_train: pd.DataFrame, fh: int):
 
         config = wandb.config
         config = dict(config)
-        model = build_model(config)
 
-        model, results = train_model_cv(model, y_train, X_train, fh=fh)
+        model, results = train_model()
         wandb.log(results)
 
         metadata = {
@@ -109,39 +106,29 @@ def run_sweep(y_train: pd.DataFrame, X_train: pd.DataFrame, fh: int):
         run.finish()
 
 
-def train_model_cv(
-    model, y_train: pd.DataFrame, X_train: pd.DataFrame, fh: int, k: int = 3
+def train_model(
+    X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame
 ):
-    """Train and evaluate the given model using cross-validation."""
+    """Train and evaluate the given model"""
 
-    data_length = len(y_train.index.get_level_values(-1).unique())
-    assert data_length >= fh * 10, "Not enough data to perform a 3 fold CV."
+    # Set up LightGBM parameters for multiclass classification
+    params = {
+        'objective': 'multiclass',
+        'metric': 'multi_logloss',
+        'num_class': len(np.unique(y_train)),  # Number of classes in your target variable
+        'boosting_type': 'gbdt',
+        'num_leaves': 31,
+        'learning_rate': 0.05,
+        'feature_fraction': 0.9
+    }
 
-    cv_step_length = data_length // k
-    initial_window = max(fh * 3, cv_step_length - fh)
-    cv = ExpandingWindowSplitter(
-        step_length=cv_step_length, fh=np.arange(fh) + 1, initial_window=initial_window
-    )
-    render_cv_scheme(cv, y_train)
+    train_data_lgb, test_data_lgb = prepare_data(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame)
 
-    results = cv_evaluate(
-        forecaster=model,
-        y=y_train,
-        X=X_train,
-        cv=cv,
-        strategy="refit",
-        scoring=MeanAbsolutePercentageError(symmetric=False),
-        error_score="raise",
-        return_data=False,
-    )
+    model = lgb.train(params, train_data, num_boost_round=100)
 
-    results = results.rename(
-        columns={
-            "test_MeanAbsolutePercentageError": "MAPE",
-            "fit_time": "fit_time",
-            "pred_time": "prediction_time",
-        }
-    )
+    model.predict
+
+
     mean_results = results[["MAPE", "fit_time", "prediction_time"]].mean(axis=0)
     mean_results = mean_results.to_dict()
     results = {"validation": mean_results}
@@ -152,22 +139,6 @@ def train_model_cv(
 
     return model, results
 
-
-def render_cv_scheme(cv, y_train: pd.DataFrame) -> str:
-    """Render the CV scheme used for training and log it to W&B."""
-
-    random_time_series = (
-        y_train.groupby(level=[0, 1])
-        .get_group((1, 111))
-        .reset_index(level=[0, 1], drop=True)
-    )
-    plot_windows(cv, random_time_series)
-
-    save_path = str(OUTPUT_DIR / "cv_scheme.png")
-    plt.savefig(save_path)
-    wandb.log({"cv_scheme": wandb.Image(save_path)})
-
-    return save_path
 
 
 if __name__ == "__main__":

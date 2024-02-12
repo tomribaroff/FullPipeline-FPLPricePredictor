@@ -60,11 +60,33 @@ def load_dataset_from_feature_store(
     ) as run:
         run.use_artifact("player_price_changes_feature_view:latest")
 
-        train_data, test_data = split_data(data)
+        X_train, X_test, Y_train, Y_test = split_data(data)
+
+        for split in ["train", "test"]:
+            split_X = locals()[f"X_{split}"]
+            split_y = locals()[f"y_{split}"]
+
+            split_metadata = {
+                "timespan": [
+                    split_X.index.get_level_values(-2).min(),
+                    split_X.index.get_level_values(-2).max(),
+                ],
+                "dataset_size": len(split_X),
+                "num_areas": len(split_X.index.get_level_values(0).unique()),
+                "num_consumer_types": len(split_X.index.get_level_values(1).unique()),
+                "y_features": split_y.columns.tolist(),
+                "X_features": split_X.columns.tolist(),
+            }
+            artifact = wandb.Artifact(
+                name=f"split_{split}",
+                type="split",
+                metadata=split_metadata,
+            )
+            run.log_artifact(artifact)
 
         run.finish()
 
-    return train_data, test_data
+    return X_train, X_test, Y_train, Y_test
 
 
 def split_data(
