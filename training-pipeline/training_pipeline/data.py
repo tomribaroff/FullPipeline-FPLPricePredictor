@@ -3,7 +3,7 @@ import hopsworks
 import pandas as pd
 import wandb
 
-from sktime.forecasting.model_selection import temporal_train_test_split
+from sklearn.model_selection import train_test_split
 
 from training_pipeline.utils import init_wandb_run
 from training_pipeline.settings import SETTINGS
@@ -60,7 +60,7 @@ def load_dataset_from_feature_store(
     ) as run:
         run.use_artifact("player_price_changes_feature_view:latest")
 
-        X_train, X_test, Y_train, Y_test = split_data(data)
+        y_train, y_test, X_train, X_test = prepare_data(data)
 
         for split in ["train", "test"]:
             split_X = locals()[f"X_{split}"]
@@ -86,10 +86,10 @@ def load_dataset_from_feature_store(
 
         run.finish()
 
-    return X_train, X_test, Y_train, Y_test
+    return y_train, y_test, X_train, X_test
 
 
-def split_data(
+def prepare_data(
     data: pd.DataFrame, target: str = "price_change_this_night"
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
@@ -100,16 +100,8 @@ def split_data(
     target = data[[target]]
  
     # Splitting the dataset into train and validation sets
-    X_train, X_test, Y_train, Y_test = train_test_split(features, target,
+    X_train, X_test, y_train, y_test = train_test_split(features, target,
                                         random_state=2023,
                                         test_size=0.20)
 
-    return X_train, X_test, Y_train, Y_test
-
-def prepare_data(
-        X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame
-)
-    
-    train_data_lgb = lgb.Dataset(X_train, label=Y_train)
-    test_data_lgb = lgb.Dataset(X_test, label=Y_test, reference=train_data)
-    return train_data_lgb, test_data_lgb
+    return y_train, y_test, X_train, X_test

@@ -33,18 +33,6 @@ from training_pipeline import transformers
 
 logger = utils.get_logger(__name__)
 
-def train_lgb_model(params: Dict, 
-                    train_data: lgb.Dataset, 
-                    num_round: int = 100, 
-                    early_stopping_rounds: int = 10,
-                    valid_data: lgb.Dataset
-):
-    """Train LGB model from training data"""
-    model = lgb.train(params, train_data, num_round, early_stopping_rounds, valid_sets=[valid_data])
-    return model
-
-
-
 def from_best_config(
     feature_view_version: Optional[int] = None,
     training_dataset_version: Optional[int] = None,
@@ -73,14 +61,14 @@ def from_best_config(
         training_dataset_version=training_dataset_version,
     )
 
-    training_start_datetime = len(y_train)
-    testing_start_datetime = len(y_test)
+    training_length= len(y_train)
+    testing_length = len(y_test)
     
     logger.info(
-        f"Training model on {training_start_datetime} data instances."
+        f"Training model on {training_length} data instances."
     )
     logger.info(
-        f"Testing model on {testing_start_datetime} data instances."
+        f"Testing model on {testing_length} data instances."
     )
 
     with utils.init_wandb_run(
@@ -105,62 +93,48 @@ def from_best_config(
         run.config.update(config)
 
         # # Baseline model
-        baseline_classifier = DummyClassifier(strategy='constant', constant=0)
-        baseline_classifier.fit(X_train, y_train)
-        _, metrics_baseline = evaluate(baseline_classifier, y_test, X_test)
+        baseline_forecaster = build_baseline_model()
+        baseline_forecaster = train_model(baseline_forecaster, y_train, X_train)
+        _, metrics_baseline = evaluate(baseline_forecaster, y_test, X_test)
+        
         for k, v in metrics_baseline.items():
             logger.info(f"Baseline test {k}: {v}")
         wandb.log({"test": {"baseline": metrics_baseline}})
+        
 
         # Build & train best model.
-        best_model = train_lgb_model(config)
+        best_model = build_model(config)
+        best_classifier = train_model(best_model, y_train, X_train)
 
         # Evaluate best model
         y_pred, metrics = evaluate(best_model, y_test, X_test)
+
         for k, v in metrics.items():
             logger.info(f"Model test {k}: {v}")
         wandb.log({"test": {"model": metrics}})
 
         # Render best model on the test set.
         results = OrderedDict({"y_train": y_train, "y_test": y_test, "y_pred": y_pred})
-        render(results, prefix="images_test")
+       
 
         # Update best model with the test set.
         # NOTE: Method update() is not supported by LightGBM + Sktime. Instead we will retrain the model on the entire dataset.
         # best_forecaster = best_forecaster.update(y_test, X=X_test)
-        best_model = train_lgb_model(
-            model=best_model,
+        best_classifier = train_model(
+            model=best_classifier,
             y_train=pd.concat([y_train, y_test]).sort_index(),
-            X_train=pd.concat([X_train, X_test]).sort_index(),
-            fh=fh,
+            X_train=pd.concat([X_train, X_test]).sort_index()
         )
-        X_forecast = compute_forecast_exogenous_variables(X_test, fh)
-        y_forecast = forecast(best_model, X_forecast)
-        logger.info(
-            f"Forecasted future values for renderin between {y_test.index.get_level_values('datetime_utc').min()} and {y_test.index.get_level_values('datetime_utc').max()}."
-        )
-        results = OrderedDict(
-            {
-                "y_train": y_train,
-                "y_test": y_test,
-                "y_forecast": y_forecast,
-            }
-        )
-        # Render best model future forecasts.
-        render(results, prefix="images_forecast")
 
         # Save best model.
         save_model_path = OUTPUT_DIR / "best_model.pkl"
-        utils.save_model(best_forecaster, save_model_path)
+        utils.save_model(best_classifier, save_model_path)
         metadata = {
             "experiment": {
-                "fh": fh,
                 "feature_view_version": feature_view_version,
                 "training_dataset_version": training_dataset_version,
-                "training_start_datetime": training_start_datetime.to_timestamp().isoformat(),
-                "training_end_datetime": training_end_datetime.to_timestamp().isoformat(),
-                "testing_start_datetime": testing_start_datetime.to_timestamp().isoformat(),
-                "testing_end_datetime": testing_end_datetime.to_timestamp().isoformat(),
+                "training_dataset_length": training_length,
+                "testing_dataset_length": testing_length,
             },
             "results": {"test": metrics},
         }
@@ -177,6 +151,13 @@ def from_best_config(
     utils.save_json(metadata, file_name="train_metadata.json")
 
     return metadata
+
+def train_model(model, y_train: pd.DataFrame, X_train: pd.DataFrame):
+    """Train a classifier on the given training set."""
+
+    model.fit(y_train, X_train) 
+
+    return model
 
 def evaluate(
     model, y_test: pd.DataFrame, X_test: pd.DataFrame
@@ -198,7 +179,7 @@ def evaluate(
 
     # Compute aggregated metrics.
     results = dict()
-    rmspe = mean_squared_percentage_error(y_test, y_pred, squared=False)
+    rmspe = mean_squared_percentage_error(y_test, y_pred, squared=False) 
     results["RMSPE"] = rmspe
     mape = mean_absolute_percentage_error(y_test, y_pred, symmetric=False)
     results["MAPE"] = mape

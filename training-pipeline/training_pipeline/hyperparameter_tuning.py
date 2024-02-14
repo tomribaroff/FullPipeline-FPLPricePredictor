@@ -47,8 +47,7 @@ def run(
 
     y_train, _, X_train, _ = load_dataset_from_feature_store(
         feature_view_version=feature_view_version,
-        training_dataset_version=training_dataset_version,
-        fh=fh,
+        training_dataset_version=training_dataset_version
     )
 
     sweep_id = run_hyperparameter_optimization(y_train, X_train)
@@ -60,7 +59,7 @@ def run(
 
 
 def run_hyperparameter_optimization(
-    y_train: pd.DataFrame, X_train: pd.DataFrame, fh: int
+    y_train: pd.DataFrame, X_train: pd.DataFrame
 ):
     """Runs hyperparameter optimization search using W&B sweeps."""
 
@@ -75,10 +74,10 @@ def run_hyperparameter_optimization(
     )
 
     return sweep_id
+ 
 
-
-def run_sweep(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame):
-    """Runs a single hyperparameter optimization step (train + CV eval) using W&B sweeps."""
+def run_sweep(y_train: pd.DataFrame, X_train: pd.DataFrame):
+    """Runs a single hyperparameter optimization step using W&B sweeps."""
 
     with init_wandb_run(
         name="experiment", job_type="hpo", group="train", add_timestamp_to_name=True
@@ -87,12 +86,13 @@ def run_sweep(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame
 
         config = wandb.config
         config = dict(config)
+        model = build_model(config)
 
-        model, results = train_model()
+        model, results = train_model(model, y_train, X_train)
         wandb.log(results)
 
         metadata = {
-            "experiment": {"name": run.name, "fh": fh},
+            "experiment": {"name": run.name},
             "results": results,
             "config": config,
         }
@@ -107,39 +107,20 @@ def run_sweep(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame
 
 
 def train_model(
-    X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame
+    model, y_train: pd.DataFrame, X_train: pd.DataFrame
 ):
     """Train and evaluate the given model"""
 
-    # Set up LightGBM parameters for multiclass classification
-    params = {
-        'objective': 'multiclass',
-        'metric': 'multi_logloss',
-        'num_class': len(np.unique(y_train)),  # Number of classes in your target variable
-        'boosting_type': 'gbdt',
-        'num_leaves': 31,
-        'learning_rate': 0.05,
-        'feature_fraction': 0.9
-    }
-
-    train_data_lgb, test_data_lgb = prepare_data(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame)
-
-    model = lgb.train(params, train_data, num_boost_round=100)
-
-    model.predict
+    model.fit(X_train,y_train)
 
 
-    mean_results = results[["MAPE", "fit_time", "prediction_time"]].mean(axis=0)
-    mean_results = mean_results.to_dict()
-    results = {"validation": mean_results}
+    results = model.score(X_train,y_train)
 
-    logger.info(f"Validation MAPE: {results['validation']['MAPE']:.2f}")
-    logger.info(f"Mean fit time: {results['validation']['fit_time']:.2f} s")
-    logger.info(f"Mean predict time: {results['validation']['prediction_time']:.2f} s")
+    results = {"training accuracy": results}
+
+    logger.info(f"Training Accuracy: {results['training accuracy']:.2f}")
 
     return model, results
-
-
 
 if __name__ == "__main__":
     fire.Fire(run)
