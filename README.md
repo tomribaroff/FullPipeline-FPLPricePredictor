@@ -5,9 +5,14 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<div align="center">
+<div align="left">
   <a href="https://github.com/tomribaroff/FullPipeline-FPLPricePredictor">
     <img src="fpl_logo.jpeg" alt="Logo" width="80" height="80">
+  </a>
+
+  <div align="right">
+  <a href="https://github.com/tomribaroff/FullPipeline-FPLPricePredictor">
+    <img src="Imperial-College-London-logo1.jpg" alt="Logo" width="240" height="80">
   </a>
 
 <h3 align="center">FPL Price Change Batch Predicition</h3>
