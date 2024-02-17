@@ -12,7 +12,7 @@
 
   <div align="center">
   <a href="https://github.com/tomribaroff/FullPipeline-FPLPricePredictor">
-    <img src="Imperial-College-London-logo1.jpg" alt="Logo" width="480" height="240">
+    <img src="Imperial-College-London-logo1.jpg" alt="Logo" width="360" height="276">
   </a>
 
 <h3 align="center">FPL Price Change Batch Predicition</h3>
