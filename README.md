@@ -18,48 +18,18 @@
 <h3 align="center">FPL Price Change Batch Predicition</h3>
 
   <p align="center">
-    A full end-to-end batch prediction pipeline. Built to predict price changes to players in the Fantasy Premier League (FPL) Football Game. If individual players in your team are set to change price, the pipeline will email you notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. 
+    A full end-to-end batch prediction pipeline. Built to predict price changes to players in the Fantasy Premier League (FPL) Football Game. If individual players in your team are set to change price, the pipeline will email you a notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. 
    
 </div>
-
-
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
-
-
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project was built both as an educational exercise for the author, but more importantly, to solve the issue of missing price changes for users on the FPL game.
+This project was built both as an educational exercise for the author, but more importantly, to solve the issue of missing price changes for users of the FPL game.
 
-This issue occurs often in FPL - a user might wish to buy or sell a player, but find that they may no longer be able to afford their planned tranfers. A player starts the game with £100m budget, and must plan transfers of players into their team accordingly.
+This issue occurs often in FPL - a user might wish to buy or sell a player, but find that they may no longer be able to afford their planned transfers. A player starts the game with £100m budget and must plan transfers of players into their team accordingly.
 
-Player's price changes occur overnight (GMT) and thus a 6pm GMT warning in advance of predicted price changes is a useful tool.
+Player's price changes occur overnight (GMT) and thus a 6 pm GMT warning in advance of predicted price changes is a useful tool.
 
 *** INSERT DIAGRAM OF OVERALL PIPELINE HERE ***
 
@@ -68,7 +38,7 @@ Player's price changes occur overnight (GMT) and thus a 6pm GMT warning in advan
 
 ### Prerequisites
 
-The environment and it's library versions are saved in this repo as ***
+The environment and its library versions are saved in this repo as ***
 
 Deploying this pipeline locally will require accounts with Hopswork, GCP and Weight & Biases.
 
