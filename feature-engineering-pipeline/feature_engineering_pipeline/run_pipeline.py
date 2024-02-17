@@ -8,8 +8,7 @@ from preprocess_data import preprocess_data_from_json
 from fetch_data_from_api import extract_current_data_from_api_overall
 from create_todays_dataframe import create_todays_dataframe_from_raw_csv
 from download_file_from_bucket import download_yesterday_csv_from_bucket
-from update_yesterday_data_rows import update_yesterday_data_rows_align
-from update_yesterday_data import update_yesterday_and_today_data_together
+from update_yesterday_data import update_yesterday_data_values
 from save_today_files_to_bucket import save_today_data_to_bucket
 from overwrite_yesterdays_data import overwrite_yesterdays_csv
 from save_data_to_feature_store import to_feature_store
@@ -47,12 +46,8 @@ def run(feature_group_version: int = 1):
     yesterday_df = download_yesterday_csv_from_bucket('{}/{}.csv'.format(yesterday, yesterday))
     logger.info(f"Successfully downloaded yesterday's DataFrame.")
 
-    logger.info(f"Realign yesterday's DataFrame according to today's DataFrame.")
-    yesterday_df = update_yesterday_data_rows_align(yesterday_df) 
-    logger.info(f"Successfully realigned")
-
     logger.info(f"Update yesterday's df according to today's df and vice versa.")
-    yesterday_df, today_df = update_yesterday_and_today_data_together(yesterday_df, today_df) 
+    yesterday_df, today_df = update_yesterday_data_values(yesterday_df, today_df) 
     logger.info(f"Successfully updated Dataframes")
 
     logger.info(f"Save today's CSV and JSON to bucket")

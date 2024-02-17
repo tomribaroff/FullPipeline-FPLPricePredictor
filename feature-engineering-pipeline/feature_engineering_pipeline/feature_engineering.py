@@ -56,5 +56,5 @@ def extract_all_players_injured(todays_player_data: pd.DataFrame) -> np.array:
         todays_player_data (pd.DataFrame): DataFrame created from fetch_data_from_api.extract_current_data_from_api_overall().
     """
     # Player currently flagged red
-    boolean_list_of_players_injured = [status == 'i' for status in todays_player_data.status]
+    boolean_list_of_players_injured = [True if x == 'i' else False for x in todays_player_data.status]
     return boolean_list_of_players_injured
