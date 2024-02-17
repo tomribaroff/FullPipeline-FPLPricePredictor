@@ -33,6 +33,8 @@ Player's price changes occur overnight (GMT) and thus a 6 pm GMT warning in adva
 
 *** INSERT DIAGRAM OF OVERALL PIPELINE HERE ***
 
+Each individual section of the pipeline (feature engineering, training, batch prediction, web app) is in separate sections of this GitHub repo. Each has their own ReadME to describe their implementation.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
