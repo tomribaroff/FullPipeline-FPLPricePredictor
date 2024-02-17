@@ -1,6 +1,6 @@
 The feature engineering pipeline follows the following steps:
 
-Extract data from the API as a JSON <br>
+Extract data from the FPL API as a JSON <br>
 ↓ <br>
 Transform JSON into CSVs <br>
 ↓ <br>
