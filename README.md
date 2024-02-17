@@ -19,16 +19,7 @@
 
   <p align="center">
     A full end-to-end batch prediction pipeline. Built to predict price changes to players in the FPL Fantasy Football Game. If individual players in your team are set to change price, the pipeline will email you notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. 
-    <br />
-    <a href="https://github.com/tomribaroff/repo_name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
-  </p>
+   
 </div>
 
 
