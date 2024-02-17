@@ -1,7 +1,7 @@
 The feature engineering pipeline follows the following steps:
 
-Extract data from the API as a JSON 
-↓
+Extract data from the API as a JSON <br>
+↓ <br>
 Transform JSON into CSVs
 ↓
 Save JSON and CSVs to a GCP bucket (our raw data storage)
