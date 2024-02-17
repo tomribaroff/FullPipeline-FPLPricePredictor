@@ -18,7 +18,7 @@
 <h3 align="center">FPL Price Change Batch Predicition</h3>
 
   <p align="center">
-    A full end-to-end batch prediction pipeline. Built to predict price changes to players in the FPL Fantasy Football Game. If individual players in your team are set to change price, the pipeline will email you notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. 
+    A full end-to-end batch prediction pipeline. Built to predict price changes to players in the Fantasy Premier League (FPL) Football Game. If individual players in your team are set to change price, the pipeline will email you notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. 
    
 </div>
 
@@ -55,9 +55,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+This project was built both as an educational exercise for the author, but more importantly, to solve the issue of missing price changes for users on the FPL game.
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `thomasribaroff`, `email_client`, `email`, `FPL Price Change Batch Prediciton`, `A full end-to-end batch prediction pipeline. Built to predict price changes to players in the FPL Fantasy Football Game. If individual players in your team are set to change price, the pipeline will email you notification of this before it happens overnight, to allow you to adjust your transfer strategy accordingly. `
+This issue occurs often in FPL - a user might wish to buy or sell a player, but find that after a few busy days at work where they haven't had time to check on the game, they may no longer be able to afford their planned tranfers. A player starts the game with £100m budget, and must plan transfers of players into their team accordingly.
+
+Player's price changes occur overnight (GMT) and thus a 6pm GMT warning of predicted price changes is a useful tool.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -65,6 +67,7 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
+* [![Docker][https://images.app.goo.gl/4i5BbKsP47BtTT9b9]]
 * [![Next][Next.js]][Next-url]
 * [![React][React.js]][React-url]
 * [![Vue][Vue.js]][Vue-url]
