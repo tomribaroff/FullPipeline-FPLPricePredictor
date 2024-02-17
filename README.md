@@ -67,7 +67,7 @@ Player's price changes occur overnight (GMT) and thus a 6pm GMT warning of predi
 
 ### Built With
 
-* [![Docker][https://images.app.goo.gl/4i5BbKsP47BtTT9b9]]
+* [![Docker][Docker.image]]
 * [![Next][Next.js]][Next-url]
 * [![React][React.js]][React-url]
 * [![Vue][Vue.js]][Vue-url]
@@ -220,3 +220,4 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
+[Docker.image]: https://images.app.goo.gl/4i5BbKsP47BtTT9b9
