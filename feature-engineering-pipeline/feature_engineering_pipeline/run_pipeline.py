@@ -6,7 +6,7 @@ import pandas as pd
 import logs,validation
 from preprocess_data import preprocess_data_from_json
 from fetch_data_from_api import extract_current_data_from_api_overall
-from create_todays_dataframe import create_todays_dataframe_from_raw_csv
+from create_todays_dataframe import create_todays_dataframe_from_raw_csvs
 from download_file_from_bucket import download_yesterday_csv_from_bucket
 from update_yesterday_data import update_yesterday_data_values
 from save_today_files_to_bucket import save_today_data_to_bucket
@@ -39,7 +39,7 @@ def run(feature_group_version: int = 1):
     logger.info("Successfully preprocessed data.")
 
     logger.info(f"Create today's DataFrame.")
-    today_df = create_todays_dataframe_from_raw_csvs(overall_events_data, todays_player_data)
+    today_df = create_todays_dataframe_from_raw_csvs(overall_events_data, todays_player_data, total_players)
     logger.info(f"Sucessfully created today's DataFrame.")
 
     logger.info(f"Download yesterday's DataFrame.")
