@@ -12,6 +12,8 @@ from pandas import json_normalize
 from streamlit_extras.add_vertical_space import add_vertical_space
 from streamlit_lottie import st_lottie
 import json
+    
+from google.cloud import firestore
 
 st.set_page_config(page_title="FPL Price Changes", layout="wide")
 
@@ -22,7 +24,7 @@ row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
     (0.1, 2, 0.2, 1, 0.1)
 )
 
-row0_1.title("Predicting your price changes so you don't have to.")
+row0_1.title("Predicting your FPL price changes so you don't have to.")
 
 
 with row0_2:
@@ -71,18 +73,19 @@ def get_user_data(user_input):
     overall_events_data = pandas.DataFrame(r_all_players_today['events'])
     current_gameweek = numpy.where(overall_events_data.is_current)[0][0] + 1
     r_my_team = requests.get(base_url+'entry/{}/event/{}/picks/'.format(user_input,current_gameweek)).json()
-    return r_my_team
+    return r_all_players_today, r_my_team
+
 
 
 user_input = str(user_input)
-contents = get_user_data(user_input=user_input)
+contents, team = get_user_data(user_input=user_input)
 
 
 line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
 
 
 with line1_1:
-    if contents == empty : # TODO write condition of user inputted team name returning nothing
+    if team == {'detail': 'Not found.'} :
         st.write(
             "Looks like your team name supplied returned no results - please check you supplied the correct 8-digit number"
         )
@@ -90,37 +93,33 @@ with line1_1:
 
     st.header("Searching for team data for team: **{}**".format(user_input))
 
-# TODO change this all to dataframes rather than dictionary searches 
-
 # Get a list of player IDs from team ID supplied 
-my_players_ids = list(map(operator.itemgetter('element'), r_my_team['picks']))
+players_this_week = pandas.DataFrame(contents['picks'])
 
 # Get list of all player IDs
-total_list_of_players_ids = list(map(operator.itemgetter('id'), r_all_players_today['elements']))
+overall_events_data = pandas.DataFrame(r_all_players_today['events'])
+todays_player_data = pandas.DataFrame(r_all_players_today['elements'])
+total_players = r_all_players_today['total_players']
 
-# Makes a list of all players that is TRUE if player is in team ID supplied
-boolean_list_of_players_in_my_team = [player in my_players_ids for player in total_list_of_players_ids]
+# Get a list of player names using your team player's IDs
+player_names = todays_player_data[[value in players_this_week.element.values for value in todays_player_data.id]]['web_name']
 
-# Use boolean list to exact all info about my players this week 
-my_players_total = [item for item, condition in zip(r_all_players_today['elements'], boolean_list_of_players_in_my_team) if condition]
+# Streamlit app
+st.title("List of Names")
 
-# Print all my player's names
-# for players in my_players_total:
-#     print(players.get('web_name'))
-
-# TODO display dataframe of 15 rows of players names and IDs 
+# Display the names in a nice way
+st.write(player_names)
 
 row3_space1, row3_1, row3_space2, row3_2, row3_space3 = st.columns(
     (0.1, 1, 0.1, 1, 0.1)
 )
 
+
+
+
 #TODO in left column: players predicted to change tonight 
-#TODO in right column: players who changed last night 
-
-# df.to_csv("books_read.csv", index=False)
-
-# with row3_1:
-#     st.subheader("Books Read")
+with row3_1:
+    st.subheader("Player's Predicted to Change Tonight:")
 #     year_df = pd.DataFrame(df["read_at_year"].dropna().value_counts()).reset_index()
 #     year_df.columns = ["Year", "Count"]
 #     year_df = year_df.sort_values(by="Year")
@@ -138,9 +137,9 @@ row3_space1, row3_1, row3_space2, row3_2, row3_space3 = st.columns(
 #         )
 #     )
 
-
-# with row3_2:
-#     st.subheader("Book Age")
+#TODO in right column: players who changed last night 
+with row3_2:
+    st.subheader("Player's Who Changed Last Night:")
 #     # plots a bar chart of the dataframe df by book.publication year by count in plotly. columns are publication year and count
 #     age_df = pd.DataFrame(df["book.publication_year"].value_counts()).reset_index()
 #     age_df.columns = ["publication_year", "count"]
@@ -174,6 +173,24 @@ row3_space1, row3_1, row3_space2, row3_2, row3_space3 = st.columns(
 # add_vertical_space()
 
 #TODO subscribe functionality to recieve email notification when model predicts for price changes
+
+# https://blog.streamlit.io/streamlit-firestore/
+
+# Initialize Firestore
+db = firestore.Client()
+
+# Streamlit code
+email = st.text_input("Enter your email:")
+team_id = st.text_input("Enter your team ID:")
+
+if st.button("Subscribe"):
+    # Save email and team_id to Firestore
+    doc_ref = db.collection("subscribers").add({
+        "email": email,
+        "team_id": team_id
+    })
+    st.success("Subscribed successfully!")
+
 
 # row4_space1, row4_1, row4_space2, row4_2, row4_space3 = st.columns(
 #     (0.1, 1, 0.1, 1, 0.1)
