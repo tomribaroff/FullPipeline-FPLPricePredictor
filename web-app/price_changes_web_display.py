@@ -43,17 +43,17 @@ row1_spacer1, row1_1, row1_spacer2 = st.columns((0.1, 3.2, 0.1))
 
 with row1_1:
     st.subheader(
-        "At 6pm GMT daily, the end-to-end ML pipeline predicts and displays the predicted price changes for all players later that evening."
+        "Predictions made using a LightGBM model trained on past overnight price changes"
     )
 
 
 row1_5_space1, row1_5_1, row1_5_space2,= st.columns(
-    (1, 1.5, 1)
+    (1, 1.6, 1)
 )
 
 with row1_5_1:
     st.write("--------------------------------")
-    st.title("Players Predicted to Change Tonight ")
+    st.title("Players Predicted to Change Tonight ~1:00GMT:")
     # Dummy Data
     st.table(
         pd.DataFrame.from_dict(
@@ -81,7 +81,7 @@ with row1_5_1:
     # else:
     #     st.error(f"Error: {response.text}")
 
-    st.title("Predictions Updated Daily ~6pm GMT")
+    st.title("Model Predictions Updated Daily ~6pm GMT")
     st.write("--------------------------------")
 
 @st.cache_data
@@ -92,16 +92,6 @@ def get_user_data(user_input):
     current_gameweek = np.where(overall_events_data.is_current)[0][0] + 1
     r_my_team = requests.get(base_url+'entry/{}/event/{}/picks/'.format(user_input,current_gameweek)).json()
     return r_all_players_today, r_my_team
-
-row2_spacer1, row2_1, row2_spacer2 = st.columns((0.1, 3.2, 0.1))
-with row2_1:
-    st.write("----------------------------")
-    st.subheader("Add your team number and email")
-    st.title("↓")
-    st.subheader("Subscribe for Email Notifications")
-    st.title("↓")
-    st.subheader("Receive email notifications of predicted price changes in your team!")
-    st.write("----------------------------")
     
 
 st.write('\n')
@@ -207,6 +197,16 @@ with row3_2:
 
 # TODO this works locally - but we need to resolve the deployemnt using a json file and Secrets
 # What happens with my JSON file currently stored locally...? Where do I store it, and how do I use secrets to access it safely?
+    
+row2_spacer1, row2_1, row2_spacer2 = st.columns((2, 3.2, 2))
+with row2_1:
+    st.write("----------------------------")
+    st.subheader("Add your team number and email")
+    st.title("↓")
+    st.subheader("Subscribe for Email Notifications")
+    st.title("↓")
+    st.subheader("Receive email notifications of predicted price changes in your team!")
+    st.write("----------------------------")
     
 st.title("Would you like to subscribe to recieve email updates when we predict a price change in your team?:")
 
