@@ -3,23 +3,25 @@ from fastapi.responses import JSONResponse
 from google.cloud import storage
 from datetime import date
 
+# TODO test these APIs locally using POSTMAN
 
 app = FastAPI()
-today = date.today()
 
-@app.get("/get_prediction/{image_name}")
-async def get_prediction(image_name: str):
+@app.get("/get_prediction")
+async def get_prediction(): # TODO test this locally with dummy data 
     # Replace 'your-gcp-bucket' and 'your-blob-path' with your GCP bucket and blob path
     bucket_name = "batch_prediction_store_bucket"
+    today = date.today()
     blob_path = f"{today}/{today}.csv"
 
     # Download the image from the GCS bucket
-    client = storage.Client()
+    # TODO When pulling data from the bucket, you need to have a try catch, to handle any GCP external errors 
+    client = storage.Client() # TODO you're going to need credentials here
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_path)
     content = blob.download_as_text()
 
-    # Perform your model prediction logic here using the 'content' variable
+    # 
 
     # Replace 'prediction_result' with the actual prediction result
     df = csv.reader(StringIO(content))
@@ -30,7 +32,7 @@ async def get_prediction(image_name: str):
     return JSONResponse(content=prediction_result)
 
 
-@app.get("/get_results/yesterday")
+@app.get("/get_yesterday_results")
 async def get_yesterday_results():
     # Replace 'your-gcp-bucket' and 'your-blob-path' with your GCP bucket and blob path
     bucket_name = "raw_data_and_features_bucket"
@@ -42,7 +44,7 @@ async def get_yesterday_results():
     blob_path = f"{yesterday_date}/{yesterday_date}.csv"
 
     # Download the CSV file from the GCS bucket
-    client = storage.Client()
+    client = storage.Client() # TODO you're going to need credentials here
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_path)
     content = blob.download_as_text()

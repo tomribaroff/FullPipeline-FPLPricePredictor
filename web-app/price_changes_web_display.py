@@ -151,7 +151,7 @@ st.write('\n')
 st.write('\n')
 
 with row3_1:
-    st.title("Players Predicted to Change Tonight:")
+    st.title("Players Predicted to Change Tonight:") # TODO this should be bigger, higher, and seperate, to stand out and be clearer 
 
     # Dummy Data
     st.table(
@@ -167,7 +167,7 @@ with row3_1:
     # today = date.today()
 
     # # URL for the FastAPI endpoint with today's date
-    # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL or IP address where your FastAPI app is accessible
+    # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL (a google run url) or IP address where your FastAPI app is accessible
 
 
     # # Make a request to the FastAPI endpoint
@@ -195,7 +195,7 @@ with row3_2:
     # pull real price changes from yesterday using FastAPI
 
     # URL for the FastAPI endpoint to get yesterday's results
-    # url = "https://your-fastapi-app-url/get_results/yesterday"  # Replace with the actual URL
+    # url = "https://your-fastapi-app-url/get_yesterday_results"  # Replace with the actual URL
 
     # # Make a request to the FastAPI endpoint
     # response = requests.get(url)
@@ -213,6 +213,10 @@ with row3_2:
     # else:
     #     st.error(f"Error: {response.text}")
 
+
+# TODO this works locally - but we need to resolve the deployemnt using a json file and Secrets
+# What happens with my JSON file currently stored locally...? Where do I store it, and how do I use secrets to access it safely?
+    
 st.title("Would you like to subscribe to recieve email updates when we predict a price change in your team?:")
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "fpl-price-change-subscription-firebase-admin.json"

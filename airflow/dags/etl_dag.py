@@ -73,6 +73,8 @@ def feature_engineering(**kwargs):
 
     return today_data
 
+# TODO if you want to import function you need to wrap it around a task structure
+# potentially combine the task definition and the function import like in https://github.com/iusztinpaul/energy-forecasting/blob/main/airflow/dags/ml_pipeline_dag.py#L292
 def download_yesterday_dataframe(**kwargs):
 
     # Load environment variables from .env file
