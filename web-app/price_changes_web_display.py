@@ -18,10 +18,12 @@ import firebase_admin
 from firebase_admin import credentials
 from datetime import date
 
-st.set_page_config(page_title="FPL Price Changes", layout="wide")
+animation_filename = "Animation - 1708274690191.json"
 
-# price_change_animation = json.loads("Animation - 1708274690191.json")
-# st_lottie(price_change_animation, speed=1, height=200, key="initial")
+with open(animation_filename, "r") as file:
+    price_change_animation = json.load(file)
+
+st_lottie(price_change_animation, speed=1, height=200, key="initial")
 
 row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
     (0.1, 2, 0.2, 1, 0.1)
@@ -46,18 +48,41 @@ with row1_1:
 
 
 row1_5_space1, row1_5_1, row1_5_space2,= st.columns(
-    (1, 1, 1)
+    (1, 1.5, 1)
 )
 
 with row1_5_1:
+    st.write("--------------------------------")
+    st.title("Players Predicted to Change Tonight ")
+    # Dummy Data
+    st.table(
+        pd.DataFrame.from_dict(
+        {"player_id": ["17", "56476"], 
+        "web_name": ["Saka", "Watkins"],
+        "predicted_price_change": ["increase", "decrease"]
+            }
+            ))
+    
+    # pull real predictions from today using FastAPI 
 
-    st.write("----------------------------")
-    st.subheader("Add your team number and email")
-    st.title("↓")
-    st.subheader("Subscribe for Email Notifications")
-    st.title("↓")
-    st.subheader("Receive email notifications of predicted price changes in your team!")
-    st.write("----------------------------")
+    # today = date.today()
+
+    # # URL for the FastAPI endpoint with today's date
+    # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL (a google run url) or IP address where your FastAPI app is accessible
+
+
+    # # Make a request to the FastAPI endpoint
+    # response = requests.get(url)
+
+    # # Check the response and display the result
+    # if response.status_code == 200:
+    #     prediction_result = response.json()["prediction"]
+    #     st.success(f"Prediction for {today}: {prediction_result}")
+    # else:
+    #     st.error(f"Error: {response.text}")
+
+    st.title("Predictions Updated Daily ~6pm GMT")
+    st.write("--------------------------------")
 
 @st.cache_data
 def get_user_data(user_input):
@@ -70,6 +95,36 @@ def get_user_data(user_input):
 
 row2_spacer1, row2_1, row2_spacer2 = st.columns((0.1, 3.2, 0.1))
 with row2_1:
+    st.write("----------------------------")
+    st.subheader("Add your team number and email")
+    st.title("↓")
+    st.subheader("Subscribe for Email Notifications")
+    st.title("↓")
+    st.subheader("Receive email notifications of predicted price changes in your team!")
+    st.write("----------------------------")
+    
+
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+
+row3_space1, row3_1, row3_space2, row3_2, row3_space3 = st.columns(
+    (0.1, 1, 0.1, 1, 0.1)
+)
+
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+st.write('\n')
+
+with row3_1:
+
+
     st.title("Let's have a look at the players in your team this week:")
     default_username = st.selectbox(
         "Select Tom's team as a default",
@@ -92,14 +147,9 @@ with row2_1:
 
 
 
-user_input = str(user_input)
-contents, team = get_user_data(user_input=user_input)
+    user_input = str(user_input)
+    contents, team = get_user_data(user_input=user_input)
 
-
-line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
-
-
-with line1_1:
     if team == {'detail': 'Not found.'} :
         st.write(
             "Looks like your team name supplied returned no results - please check you supplied the correct number"
@@ -108,78 +158,19 @@ with line1_1:
 
     st.write("Searching for team data for team: **{}**".format(user_input))
 
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
+    # Get a list of player IDs from team ID supplied 
+    players_this_week = pd.DataFrame(team['picks'])
 
-# Get a list of player IDs from team ID supplied 
-players_this_week = pd.DataFrame(team['picks'])
+    # Get list of all player IDs
+    overall_events_data = pd.DataFrame(contents['events'])
+    todays_player_data = pd.DataFrame(contents['elements'])
+    total_players = contents['total_players']
 
-# Get list of all player IDs
-overall_events_data = pd.DataFrame(contents['events'])
-todays_player_data = pd.DataFrame(contents['elements'])
-total_players = contents['total_players']
+    # Get a list of player names using your team player's IDs
+    player_names = todays_player_data[[value in players_this_week.element.values for value in todays_player_data.id]]['web_name']
 
-# Get a list of player names using your team player's IDs
-player_names = todays_player_data[[value in players_this_week.element.values for value in todays_player_data.id]]['web_name']
-
-# Streamlit app
-st.title("Players in your selected team this week:")
-
-# Display the names in a nice way
-st.table(player_names)
-
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-
-row3_space1, row3_1, row3_space2, row3_2, row3_space3 = st.columns(
-    (0.1, 1, 0.1, 1, 0.1)
-)
-
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-st.write('\n')
-
-with row3_1:
-    st.title("Players Predicted to Change Tonight:") # TODO this should be bigger, higher, and seperate, to stand out and be clearer 
-
-    # Dummy Data
-    st.table(
-        pd.DataFrame.from_dict(
-        {"player_id": ["17", "56476"], 
-         "web_name": ["Saka", "Watkins"],
-         "predicted_price_change": ["increase", "decrease"]
-              }
-              ))
-    
-    # pull real predictions from today using FastAPI 
-
-    # today = date.today()
-
-    # # URL for the FastAPI endpoint with today's date
-    # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL (a google run url) or IP address where your FastAPI app is accessible
-
-
-    # # Make a request to the FastAPI endpoint
-    # response = requests.get(url)
-
-    # # Check the response and display the result
-    # if response.status_code == 200:
-    #     prediction_result = response.json()["prediction"]
-    #     st.success(f"Prediction for {today}: {prediction_result}")
-    # else:
-    #     st.error(f"Error: {response.text}")
-
+    # Display the names in a nice way
+    st.table(player_names)
 
 with row3_2:
     st.title("Players Who Changed Last Night:")
