@@ -31,7 +31,10 @@ This issue occurs often in FPL - a user might wish to buy or sell a player, but 
 
 Player's price changes occur overnight (GMT) and thus a 6 pm GMT warning in advance of predicted price changes is a useful tool.
 
-*** INSERT DIAGRAM OF OVERALL PIPELINE HERE ***
+<div align="center">
+  <a href="https://github.com/tomribaroff/FullPipeline-FPLPricePredictor">
+    <img src="Pipeline-Diagram.png" alt="Logo" width="360" height="360">
+  </a>
 
 Each individual section of the pipeline (feature engineering, training, batch prediction, web app) is in separate sections of this GitHub repo. Each has their own ReadME to describe their implementation.
 

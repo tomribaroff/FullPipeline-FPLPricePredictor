@@ -58,17 +58,17 @@ def run(feature_group_version: int = 1):
     overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday)) 
     logger.info(f"Successfully overwritten yesterday's CSV to bucket")
 
-    logger.info("Building validation expectation suite.")
-    validation_expectation_suite = validation.build_expectation_suite()
-    logger.info("Successfully built validation expectation suite.")
+    # logger.info("Building validation expectation suite.")
+    # validation_expectation_suite = validation.build_expectation_suite()
+    # logger.info("Successfully built validation expectation suite.")
 
-    logger.info(f"Validating data and loading yesterday's complete dataset to the feature store.")
-    save_data_to_feature_store.to_feature_store(
-        data,
-        validation_expectation_suite=validation_expectation_suite,
-        feature_group_version=feature_group_version,
-    )
-    logger.info("Successfully validated data and loaded it to the feature store.")
+    # logger.info(f"Validating data and loading yesterday's complete dataset to the feature store.")
+    # save_data_to_feature_store.to_feature_store(
+    #     data,
+    #     validation_expectation_suite=validation_expectation_suite,
+    #     feature_group_version=feature_group_version,
+    # )
+    # logger.info("Successfully validated data and loaded it to the feature store.")
 
     logger.info(f"Successfully completion of ETL pipeline loop")
 

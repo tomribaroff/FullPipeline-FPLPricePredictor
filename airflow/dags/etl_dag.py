@@ -1,9 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
+from dotenv import load_dotenv
+import pandas as pd
+import numpy as np
+import datetime
+import os
+import json
+from io import StringIO
+from google.cloud import storage
+from google.oauth2 import service_account
 
 default_args = {
     'owner': 'airflow',
@@ -28,9 +37,6 @@ def fetch_data(**kwargs):
     return r_all_players_today
 
 def feature_engineering(**kwargs):
-
-    import pandas as pd
-    import numpy as np
 
     #split json into dataframes
     json_file = kwargs['json_file']
@@ -67,17 +73,56 @@ def feature_engineering(**kwargs):
 
     return today_data
 
-def save_to_gcs(**kwargs):
-    # Your code to save data to GCS bucket
-    pass
+def download_yesterday_dataframe(**kwargs):
+
+    # Load environment variables from .env file
+    load_dotenv()
+
+    # Get bucket file path from date
+    yesterday = date.today - datetime.timedelta(1)
+    bucket_file_path = '{}/{}.csv'.format(yesterday, yesterday)
+
+    # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
+    creds = os.getenv('JSON_SA_READ_WRITE_PATH')
+    gcp_project_id = os.getenv('GCP_PROJECT_ID')
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
+
+    # Load service account credentials from JSON file
+    with open(creds) as json_file:
+        data = json.load(json_file)
+
+    # Create service account credentials from JSON keyfile
+    credentials = service_account.Credentials.from_service_account_info(data)
+
+    # Create a Google Cloud Storage client with the provided credentials and project ID
+    client = storage.Client(credentials=credentials, project=gcp_project_id)
+
+    # Get the specified bucket
+    bucket = client.get_bucket(gcp_bucket_name)
+
+    # Get the blob (CSV file) from the bucket
+    blob = bucket.blob(bucket_file_path)
+
+    # Download the contents of the blob as a string
+    csv_content = blob.download_as_text()
+
+    # Create a Pandas DataFrame from the CSV content
+    df = pd.read_csv(StringIO(csv_content))
+
+    return df
 
 def update_yesterday_data(**kwargs):
-    # Your code to update yesterday's data in GCS bucket
+    yesterday_df, today_df = update_yesterday_data_values(yesterday_df, today_df)
     pass
 
-def upload_to_feature_store(**kwargs):
-    # Your code to upload data to the feature store
+def save_to_gcs(**kwargs):
+    save_today_data_to_bucket(today_df, today_json, '{}/{}.csv'.format(today, today))
+    overwrite_yesterdays_csv(yesterday_df, '{}/{}.csv'.format(yesterday, yesterday)) 
     pass
+
+# def upload_to_feature_store(**kwargs):
+#     # Your code to upload data to the feature store
+#     pass
 
 fetch_task = PythonOperator(
     task_id='fetch_data',
@@ -103,13 +148,13 @@ update_yesterday_data_task = PythonOperator(
     dag=dag,
 )
 
-upload_to_feature_store_task = PythonOperator(
-    task_id='upload_to_feature_store',
-    python_callable=upload_to_feature_store,
-    dag=dag,
-)
+# upload_to_feature_store_task = PythonOperator(
+#     task_id='upload_to_feature_store',
+#     python_callable=upload_to_feature_store,
+#     dag=dag,
+# )
 
 # Define dependencies
 fetch_task >> feature_engineering_task >> save_to_gcs_task
 save_to_gcs_task >> update_yesterday_data_task
-update_yesterday_data_task >> upload_to_feature_store_task
+update_yesterday_data_task #>> upload_to_feature_store_task

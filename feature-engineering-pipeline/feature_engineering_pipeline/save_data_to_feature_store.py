@@ -1,3 +1,8 @@
+import pandas as pd
+import hopsworks
+from great_expectations.core import ExpectationSuite
+from hsfs.feature_group import FeatureGroup
+
 
 def to_feature_store(
     data: pd.DataFrame,
@@ -12,7 +17,7 @@ def to_feature_store(
 
     # Connect to feature store.
     project = hopsworks.login(
-        api_key_value=SETTINGS["FS_API_KEY"], project="fplpredictpipeline"
+        #TODO ADD LOGIN CREDENTIALS
     )
     feature_store = project.get_feature_store()
 
@@ -34,17 +39,7 @@ def to_feature_store(
         },
     )
 
-    # Add feature descriptions.
-        "price_change_this_night": numpy.nan, #currently unknown
-        "net_transfers_in_out_since_last_price_change": 0, #currently unknown
-        "net_transfers_in_out_since_yesterday": 0, #currently unknown
-        "price_change_so_far_for_this_event ": all_players_price_change_for_current_event,
-        "total_active_players_estimate": total_active_players_estimate,
-        "players_injured": boolean_list_of_players_injured,
-        "player_prices_today" : all_players_prices_today,
-        "net_transfers_in_out_overall_as_of_today" : net_transfers_overall_today, 
-        "player_ids" : todays_player_data.id
-
+    # Add feature descriptions
     feature_descriptions = [
         {
             "name": "price_change_this_night",
