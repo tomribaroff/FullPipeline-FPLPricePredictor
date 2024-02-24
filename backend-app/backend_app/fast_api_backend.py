@@ -1,31 +1,59 @@
+import datetime
+from io import StringIO
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from google.cloud import storage
 from datetime import date
+from dotenv import load_dotenv
+import os
+from google.oauth2 import service_account
+import json 
+import pandas as pd
+import numpy as np
 
-# TODO test these APIs locally using POSTMAN
+# TODO test the APIs using Postman 
+# TODO deploy the APIs using Cloud Run and then put the given url into the streamlit app 
+
+load_dotenv()
+
+creds = os.getenv('JSON_SA_READ_WRITE_PATH')
+gcp_project_id = os.getenv('GCP_PROJECT_ID')
 
 app = FastAPI()
 
+today = date.today()
+yesterday = today - datetime.timedelta(1)
+
 @app.get("/get_prediction")
-async def get_prediction(): # TODO test this locally with dummy data 
-    # Replace 'your-gcp-bucket' and 'your-blob-path' with your GCP bucket and blob path
-    bucket_name = "batch_prediction_store_bucket"
-    today = date.today()
-    blob_path = f"{today}/{today}.csv"
+async def get_prediction():
+    
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME_PREDICTIONS')
+    bucket_file_path = f"{today}.csv"
 
-    # Download the image from the GCS bucket
-    # TODO When pulling data from the bucket, you need to have a try catch, to handle any GCP external errors 
-    client = storage.Client() # TODO you're going to need credentials here
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(blob_path)
-    content = blob.download_as_text()
+    # Load service account credentials from JSON file
+    with open(creds) as json_file:
+        data = json.load(json_file)
 
-    # 
+    # Create service account credentials from JSON keyfile
+    credentials = service_account.Credentials.from_service_account_info(data)
 
-    # Replace 'prediction_result' with the actual prediction result
-    df = csv.reader(StringIO(content))
-    df = df[df.predicted_price_change_this_night != 0] #TODO this line will need to change according to how the CSV is saved in the bucket and loaded from the bucket
+    # Create a Google Cloud Storage client with the provided credentials and project ID
+    client = storage.Client(credentials=credentials, project=gcp_project_id)
+
+    # Get the specified bucket
+    bucket = client.get_bucket(gcp_bucket_name)
+
+    # Get the blob (CSV file) from the bucket
+    blob = bucket.blob(bucket_file_path)
+
+    # Download the contents of the blob as a string
+    csv_content = blob.download_as_text()
+
+    # Create a Pandas DataFrame from the CSV content
+    df = pd.read_csv(StringIO(csv_content))
+
+    # Filter results for just those who's price change we predict 
+    df = df[df.predicted_price_change != 0] 
 
     prediction_result = {"players_predicted_to_change_price": df}
 
@@ -34,26 +62,35 @@ async def get_prediction(): # TODO test this locally with dummy data
 
 @app.get("/get_yesterday_results")
 async def get_yesterday_results():
-    # Replace 'your-gcp-bucket' and 'your-blob-path' with your GCP bucket and blob path
-    bucket_name = "raw_data_and_features_bucket"
 
-    # Calculate yesterday's date
-    yesterday_date = today - datetime.timedelta(days=1)
-    
-    # Specify the CSV file path in the GCS bucket
-    blob_path = f"{yesterday_date}/{yesterday_date}.csv"
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME_STORE')
+    bucket_file_path = f"{yesterday}/{yesterday}.csv"
 
-    # Download the CSV file from the GCS bucket
-    client = storage.Client() # TODO you're going to need credentials here
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(blob_path)
-    content = blob.download_as_text()
+    # Load service account credentials from JSON file
+    with open(creds) as json_file:
+        data = json.load(json_file)
 
-    # Perform any additional data processing based on your CSV structure
-    df = pd.read_csv(StringIO(content))
-    df_filtered = df[df['price_change_this_night'] != 0]
+    # Create service account credentials from JSON keyfile
+    credentials = service_account.Credentials.from_service_account_info(data)
 
-    # Replace 'players_predicted_to_change_price' with the relevant data from your DataFrame
-    result_data = {"players_predicted_to_change_price": df_filtered.to_dict(orient='records')}
+    # Create a Google Cloud Storage client with the provided credentials and project ID
+    client = storage.Client(credentials=credentials, project=gcp_project_id)
 
-    return JSONResponse(content=result_data)
+    # Get the specified bucket
+    bucket = client.get_bucket(gcp_bucket_name)
+
+    # Get the blob (CSV file) from the bucket
+    blob = bucket.blob(bucket_file_path)
+
+    # Download the contents of the blob as a string
+    csv_content = blob.download_as_text()
+
+    # Create a Pandas DataFrame from the CSV content
+    df = pd.read_csv(StringIO(csv_content))
+
+    # Filter results for just those who's price change we predict 
+    df = df[df.price_change_this_night != 0] 
+
+    prediction_result = {"players_who_changed_price": df}
+
+    return JSONResponse(content=prediction_result)

@@ -194,9 +194,6 @@ with row3_2:
     # else:
     #     st.error(f"Error: {response.text}")
 
-
-# TODO this works locally - but we need to resolve the deployemnt using a json file and Secrets
-# What happens with my JSON file currently stored locally...? Where do I store it, and how do I use secrets to access it safely?
     
 row2_spacer1, row2_1, row2_spacer2 = st.columns((2, 3.2, 2))
 with row2_1:
