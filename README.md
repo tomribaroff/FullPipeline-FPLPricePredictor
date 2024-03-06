@@ -43,7 +43,7 @@ Each individual section of the pipeline (feature engineering, training, batch pr
 
 ### Prerequisites
 
-The environment and its library versions are saved in this repo as ***
+The environment and its library versions are saved in this repo as requirements.txt
 
 Deploying this pipeline locally will require accounts with Hopswork, GCP and Weight & Biases.
 
@@ -56,7 +56,7 @@ Deploying this pipeline locally will require accounts with Hopswork, GCP and Wei
 
 Tom Ribaroff - tomribaroff@gmail.com
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/github_username/FullPipeline-FPLPricePredictor](https://github.com/github_username/FullPipeline-FPLPricePredictor)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
