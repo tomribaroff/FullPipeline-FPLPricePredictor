@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from google.cloud import storage
 from datetime import date
-from dotenv import load_dotenv
+from dotenv.main import load_dotenv
 import os
 from google.oauth2 import service_account
 import json 
