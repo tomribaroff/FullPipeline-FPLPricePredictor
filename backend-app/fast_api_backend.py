@@ -10,8 +10,7 @@ from google.oauth2 import service_account
 import json 
 import pandas as pd
 import numpy as np
-
-# TODO test the APIs using Postman 
+ 
 # TODO deploy the APIs using Cloud Run and then put the given url into the streamlit app 
 
 load_dotenv(override=True)
