@@ -1,8 +1,9 @@
+import os
+from dotenv import load_dotenv
 import pandas as pd
 import hopsworks
 from great_expectations.core import ExpectationSuite
 from hsfs.feature_group import FeatureGroup
-
 
 def to_feature_store(
     data: pd.DataFrame,
@@ -15,9 +16,16 @@ def to_feature_store(
     feature store in the feature store.
     """
 
+     # Load environment variables from .env file
+    load_dotenv()
+
+    # Retrieve Hopswork credentials environment variables
+    fs_api = os.getenv('FS_API_KEY')
+    fs_name = os.getenv('FS_PROJECT_NAME')
+
     # Connect to feature store.
     project = hopsworks.login(
-        #TODO ADD LOGIN CREDENTIALS
+        api_key_value=fs_api, project=fs_name
     )
     feature_store = project.get_feature_store()
 

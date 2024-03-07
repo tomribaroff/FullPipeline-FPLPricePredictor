@@ -70,6 +70,8 @@ with row1_5_1:
     # # URL for the FastAPI endpoint with today's date
     # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL (a google run url) or IP address where your FastAPI app is accessible
 
+    # you will need to filter batch prediction results 
+    # df[df.predicted_price_change != 0] 
 
     # # Make a request to the FastAPI endpoint
     # response = requests.get(url)
