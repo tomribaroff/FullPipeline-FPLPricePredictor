@@ -68,10 +68,7 @@ with row1_5_1:
     # today = date.today()
 
     # # URL for the FastAPI endpoint with today's date
-    # url = f"https://your-fastapi-app-url/get_prediction/{today}" #TODO change your-fastapi-app-url to correct public URL (a google run url) or IP address where your FastAPI app is accessible
-
-    # you will need to filter batch prediction results 
-    # df[df.predicted_price_change != 0] 
+    # url = f"https://fplpipeline-bycaxbpela-uc.a.run.app/get_prediction/{today}"
 
     # # Make a request to the FastAPI endpoint
     # response = requests.get(url)
@@ -178,7 +175,7 @@ with row3_2:
     # pull real price changes from yesterday using FastAPI
 
     # URL for the FastAPI endpoint to get yesterday's results
-    # url = "https://your-fastapi-app-url/get_yesterday_results"  # Replace with the actual URL
+    # url = "https://fplpipeline-bycaxbpela-uc.a.run.app/get_yesterday_results"
 
     # # Make a request to the FastAPI endpoint
     # response = requests.get(url)
