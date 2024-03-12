@@ -34,7 +34,3 @@ def create_todays_dataframe_from_raw_csvs(overall_events_data: pd.DataFrame,
     today_data = pandas.DataFrame(price_change_dict)
 
     return today_data
-
-
-
-

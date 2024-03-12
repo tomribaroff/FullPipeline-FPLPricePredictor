@@ -1,5 +1,3 @@
-import datetime
-from typing import Optional
 import fire
 import pandas as pd
 
@@ -24,11 +22,18 @@ today = date.today()
 # Get yesterday date
 yesterday = today - timedelta(days = 1) 
 
-def run(feature_group_version: int = 1):
+def run(today_date):
     """
-    Extract data from the API, transform it, save json and CSV to a GCP bucket, and update past CSV with new information, overwrite past CSV in bucket with updated past CSV, upload updated past CSV to feature store
+    Extract data from the API, 
+    transform it, 
+    save json and CSV to a GCP bucket, 
+    update past CSV with new information, 
+    overwrite past CSV in bucket with updated past CSV, 
+    upload updated past CSV to feature store
 
     """
+
+    logger.info(f"ETL Pipeline run on {today_date}")
 
     logger.info(f"Extracting data from API.")
     today_json = extract_current_data_from_api_overall
