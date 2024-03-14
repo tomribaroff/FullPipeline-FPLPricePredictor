@@ -1,3 +1,9 @@
+
+from typing import Dict, Optional
+
+import requests
+
+
 def extract_current_data_from_api_overall(
 ) -> Optional[Dict]:
     """
@@ -18,7 +24,7 @@ https://www.game-change.co.uk/2023/02/10/a-complete-guide-to-the-fantasy-premier
     return r_all_players_today
 
 def extract_current_data_from_api_personal(
-        team_id: int = 3402291
+        team_id: int = 3402291,
         current_gameweek: int = 1) -> Optional[Dict]:
     """
     Extract data from the Fantasy Football Data API that contains data on all player transfers 
@@ -32,6 +38,7 @@ https://www.game-change.co.uk/2023/02/10/a-complete-guide-to-the-fantasy-premier
     Returns:
           A dictionary of extracted data
     """
+    base_url = 'https://fantasy.premierleague.com/api/'
     r_my_team = requests.get(base_url+'entry/{}/event/{}/picks/'.format(team_id,current_gameweek)).json()
 
     return r_my_team

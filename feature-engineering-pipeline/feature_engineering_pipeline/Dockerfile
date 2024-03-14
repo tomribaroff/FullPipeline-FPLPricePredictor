@@ -1,7 +1,17 @@
-FROM bitnami/python
-RUN apt-get install git
-RUN pip install scikit-learn
+# 
+FROM python:3.9
 
-COPY docker_random_number.py .
+# 
+WORKDIR /code
 
-CMD ["python", "docker_random_number.py"]
+# 
+COPY ./requirements.txt /code/requirements.txt
+
+# 
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+# 
+COPY . /code/app
+
+#
+CMD ["python", "./code/app/run_pipeline.py"]
