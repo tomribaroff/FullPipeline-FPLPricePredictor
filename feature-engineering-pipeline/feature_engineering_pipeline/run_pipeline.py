@@ -9,7 +9,7 @@ from download_file_from_bucket import download_yesterday_csv_from_bucket
 from update_yesterday_data import update_yesterday_data_values
 from save_today_files_to_bucket import save_today_data_to_bucket
 from overwrite_yesterdays_data import overwrite_yesterdays_csv
-from save_data_to_feature_store import to_feature_store
+#from save_data_to_feature_store import to_feature_store
 
 from datetime import date
 from datetime import timedelta
