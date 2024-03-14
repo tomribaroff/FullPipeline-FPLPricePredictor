@@ -41,6 +41,11 @@ dag = DAG(
     schedule=timedelta(days=1),  # Runs daily
 )
 
+#TODO write second dag file, totally succinct in one line like before, and get google cloud run to run it once a day.
+#TODO collect data for a few weeks, and in the meantime, make sure the training pipeline is working
+#TODO ideally use that time to test webapp and email subscription service too
+#TODO when you have good data, train a model and at that stage get Robert to help with a code review 
+
 # Get today's date
 #today = date.today()
 today = '2024-02-23'
@@ -227,16 +232,20 @@ def save_today_data_to_bucket(bucket_file_path = '{}/{}.csv'.format(today, today
     json_data = kwargs['ti'].xcom_pull(task_ids='extract_data', key='json_data')
 
     csv_data = pd.DataFrame(csv_data)
+    json_data = json.dumps(json_data)
+    
     
     # Load environment variables from .env file
     load_dotenv()
 
     # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
+    #TODO swap this for Airflow Variables 
     creds = os.getenv('JSON_SA_READ_WRITE_PATH', 'dags/high-producer-412815-3b916fb32033.json')
     gcp_project_id = os.getenv('GCP_PROJECT_ID', 'high-producer-412815')
     gcp_bucket_name = os.getenv('GCP_BUCKET_NAME', 'raw_data_and_features_bucket')
 
     # Load service account credentials from JSON file
+    #TODO swap this for Airflow Connections - maybe not worth it for now
     with open(creds) as json_file:
         data = json.load(json_file)
 
@@ -253,7 +262,7 @@ def save_today_data_to_bucket(bucket_file_path = '{}/{}.csv'.format(today, today
     blob = bucket.blob(bucket_file_path)
 
     # Upload the CSV data to the blob
-    blob.upload_from_string(csv_data, content_type='text/csv')
+    blob.upload_from_string(csv_data.to_csv(), content_type='text/csv')
 
     # Upload the JSON data to the blob
     blob.upload_from_string(json_data, content_type='application/json')
@@ -272,7 +281,9 @@ def overwrite_yesterdays_csv(bucket_file_path = '{}/{}.csv'.format(yesterday, ye
 
     # Pull the JSON data from XComs
     yesterday_csv_updated = kwargs['ti'].xcom_pull(task_ids='update_yesterday_data', key='yesterday_data')
+    
     yesterday_csv_updated = pd.DataFrame(yesterday_csv_updated)
+
 
     # Load service account credentials from JSON file
     creds = os.getenv('JSON_SA_READ_WRITE_PATH', 'dags/high-producer-412815-3b916fb32033.json')
@@ -292,7 +303,7 @@ def overwrite_yesterdays_csv(bucket_file_path = '{}/{}.csv'.format(yesterday, ye
     blob.delete()
 
     # Upload the new file
-    blob.upload_from_string(yesterday_csv_updated, content_type='text/csv')
+    blob.upload_from_string(yesterday_csv_updated.to_csv(), content_type='text/csv')
 
 
 extract_data_task = PythonOperator(
