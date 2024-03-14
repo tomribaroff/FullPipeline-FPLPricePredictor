@@ -27,8 +27,6 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-#TODO test this python file runs locally without any import errors etc.
-
 #TODO test each airflow task runs locally https://airflow.apache.org/docs/apache-airflow/stable/start.html
 
 #TODO test entire pipeline can run locally 
