@@ -22,7 +22,7 @@ from update_yesterday_data_rows import update_yesterday_data_rows_align
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2024, 2, 20),
+    'start_date': datetime.datetime(2024, 2, 20),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
@@ -42,10 +42,12 @@ dag = DAG(
 )
 
 # Get today's date
-today = date.today() 
+#today = date.today()
+today = '2024-02-23'
 
 # Get yesterday date
-yesterday = today - timedelta(days = 1) 
+#yesterday = today - timedelta(days = 1) 
+yesterday = '2024-02-22'
 
 def extract_current_data_from_api_overall(**kwargs) -> Optional[Dict]:
     """
@@ -151,9 +153,9 @@ def download_yesterday_csv_from_bucket(bucket_file_path = '{}/{}.csv'.format(yes
     load_dotenv()
 
     # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
-    creds = os.getenv('JSON_SA_READ_WRITE_PATH')
-    gcp_project_id = os.getenv('GCP_PROJECT_ID')
-    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
+    creds = os.getenv('JSON_SA_READ_WRITE_PATH', 'dags/high-producer-412815-3b916fb32033.json')
+    gcp_project_id = os.getenv('GCP_PROJECT_ID', 'high-producer-412815')
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME', 'raw_data_and_features_bucket')
 
     # Load service account credentials from JSON file
     with open(creds) as json_file:
@@ -182,7 +184,7 @@ def download_yesterday_csv_from_bucket(bucket_file_path = '{}/{}.csv'.format(yes
 
     return df
 
-def update_yesterday_data_values(yesterday_df, today_df, **kwargs):
+def update_yesterday_data_values(**kwargs):
 
     # Pull the JSON data from XComs
     yesterday_data = kwargs['ti'].xcom_pull(task_ids='download_yesterday_data', key='yesterday_data')
@@ -207,7 +209,7 @@ def update_yesterday_data_values(yesterday_df, today_df, **kwargs):
     kwargs['ti'].xcom_push(key='yesterday_data', value=yesterday_data)
     kwargs['ti'].xcom_push(key='today_data', value=today_data)
 
-    return yesterday_df, today_df
+    return yesterday_data, today_data
 
 def save_today_data_to_bucket(bucket_file_path = '{}/{}.csv'.format(today, today), **kwargs):
     """
@@ -223,15 +225,16 @@ def save_today_data_to_bucket(bucket_file_path = '{}/{}.csv'.format(today, today
     # Pull the JSON data from XComs
     csv_data = kwargs['ti'].xcom_pull(task_ids='update_yesterday_data', key='today_data')
     json_data = kwargs['ti'].xcom_pull(task_ids='extract_data', key='json_data')
-    
 
+    csv_data = pd.DataFrame(csv_data)
+    
     # Load environment variables from .env file
     load_dotenv()
 
     # Retrieve Google Cloud Storage service account JSON path and project ID from environment variables
-    creds = os.getenv('JSON_SA_READ_WRITE_PATH')
-    gcp_project_id = os.getenv('GCP_PROJECT_ID')
-    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
+    creds = os.getenv('JSON_SA_READ_WRITE_PATH', 'dags/high-producer-412815-3b916fb32033.json')
+    gcp_project_id = os.getenv('GCP_PROJECT_ID', 'high-producer-412815')
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME', 'raw_data_and_features_bucket')
 
     # Load service account credentials from JSON file
     with open(creds) as json_file:
@@ -269,11 +272,12 @@ def overwrite_yesterdays_csv(bucket_file_path = '{}/{}.csv'.format(yesterday, ye
 
     # Pull the JSON data from XComs
     yesterday_csv_updated = kwargs['ti'].xcom_pull(task_ids='update_yesterday_data', key='yesterday_data')
+    yesterday_csv_updated = pd.DataFrame(yesterday_csv_updated)
 
     # Load service account credentials from JSON file
-    creds = os.getenv('JSON_SA_READ_WRITE_PATH')
+    creds = os.getenv('JSON_SA_READ_WRITE_PATH', 'dags/high-producer-412815-3b916fb32033.json')
     credentials = service_account.Credentials.from_service_account_file(creds)
-    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME')
+    gcp_bucket_name = os.getenv('GCP_BUCKET_NAME', 'raw_data_and_features_bucket')
 
     # Create a Google Cloud Storage client with the provided credentials
     client = storage.Client(credentials=credentials)
@@ -359,11 +363,11 @@ overwrite_yesterdays_csv_task = PythonOperator(
 #     dag=dag,
 # )
 
-#TODO with dag() ?
-# No, this syntax should work 
-
 # Define dependencies
 extract_data_task >> preprocess_data_task >> create_today_data_task
+create_today_data_task >> update_yesterday_data_task
 download_yesterday_data_task >> update_yesterday_data_task
-save_today_data_task >> overwrite_yesterdays_csv_task
+update_yesterday_data_task >> save_today_data_task
+update_yesterday_data_task >> overwrite_yesterdays_csv_task
+
 #build_validation_suite_task >> save_data_to_feature_store_task
